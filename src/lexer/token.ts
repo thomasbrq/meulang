@@ -11,9 +11,20 @@ export enum TokenType {
   MINUS = "-",
   MULT = "*",
   DIV = "/",
+
+  IDENTIFIER = "IDENTIFIER",
+  VAR = "VAR",
+  CONST = "CONST",
+  ASSIGN = "=",
+  SEMI_COLON = ";",
 }
 
 export type Token = {
   type: string;
   value: string;
 };
+
+export const keywords = new Map<string, TokenType>([
+  ["var", TokenType.VAR],
+  ["const", TokenType.CONST],
+]);
