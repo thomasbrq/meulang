@@ -6,6 +6,7 @@ import type {
   NumericLiteral,
   Program,
   Statement,
+  VariableDeclaration,
 } from "./types";
 
 export class Parser {
@@ -29,12 +30,14 @@ export class Parser {
     this.nextToken = this.lexer.next_token();
   }
 
-  private expect(type: TokenType, message: string): void {
+  private expect(type: TokenType, message: string): Token {
     if (this.currentToken.type != type) {
       console.error(message);
       process.exit(1);
     }
+    const token = this.currentToken;
     this.eat();
+    return token;
   }
 
   parse(): Program {
@@ -51,7 +54,61 @@ export class Parser {
   }
 
   private parse_statement(): Statement {
-    return this.parse_expression();
+    let token = this.currentToken;
+
+    switch (token.type) {
+      case TokenType.CONST:
+      case TokenType.VAR: {
+        return this.parse_declaration();
+      }
+      default: {
+        return this.parse_expression();
+      }
+    }
+  }
+
+  /**
+    let a;
+    let a = 5;
+    const b;
+  */
+  private parse_declaration() {
+    const current_token = this.currentToken;
+    const constant = current_token.type == TokenType.CONST;
+
+    this.eat();
+
+    const identifier: Token = this.expect(
+      TokenType.IDENTIFIER,
+      "Identifier expected.",
+    );
+
+    if (this.currentToken.type == TokenType.SEMI_COLON) {
+      if (constant) {
+        console.error("You must assign a value to a const declaration.");
+        process.exit(1);
+      }
+
+      // TODO: assign 'null' by default.
+      return {
+        type: "VariableDeclaration",
+        name: identifier.value,
+        constant: false,
+      } as VariableDeclaration;
+    }
+
+    this.expect(TokenType.ASSIGN, "'=' expected.");
+
+    const value = this.parse_expression();
+
+    this.expect(TokenType.SEMI_COLON, "semicolon expected");
+
+    return {
+      type: "VariableDeclaration",
+      name: identifier.value,
+      value,
+      constant,
+    } as VariableDeclaration;
   }
 
   private parse_expression(): Expression {

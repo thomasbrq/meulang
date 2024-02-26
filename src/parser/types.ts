@@ -7,6 +7,13 @@ export interface Program extends Statement {
   body: Statement[];
 }
 
+export interface VariableDeclaration extends Statement {
+  type: "VariableDeclaration";
+  name: string;
+  value?: Expression;
+  constant: boolean;
+}
+
 export interface Expression extends Statement {}
 
 export type BinaryExpressionType = "+" | "-" | "/" | "*";
