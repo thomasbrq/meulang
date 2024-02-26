@@ -28,3 +28,15 @@ export interface NumericLiteral extends Expression {
   type: "NumericLiteral";
   value: number;
 }
+
+export interface Indentifier extends Expression {
+  type: "Identifier";
+  name: string;
+}
+
+export interface AssignmentExpression extends Expression {
+  type: "AssignmentExpression";
+  left: Indentifier;
+  right: Expression;
+  operator: string;
+}

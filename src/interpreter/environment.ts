@@ -2,7 +2,8 @@ import type { Value } from "./types";
 
 export class Environment {
   private parent?: Environment;
-  private values = new Map<string, Value>();
+  private variables = new Map<string, Value>();
+  private constants = new Set<string>();
 
   constructor(parent?: Environment) {
     if (parent) {
@@ -11,22 +12,45 @@ export class Environment {
   }
 
   get(name: string): Value {
-    let value = Map.prototype.get.call(this.values, name);
+    let value = Map.prototype.get.call(this.variables, name);
     if (value == undefined && this.parent != undefined) {
       value = this.parent.get(name);
-    }
-
-    if (value == undefined) {
-      throw new Error(`undefined variable ${name}`);
     }
 
     return value;
   }
 
-  set(name: string, value: Value) {
-    if (this.values.has(name)) {
-      throw new Error(`${name} already declared.`);
+  declare(name: string, value: Value, is_constant: boolean) {
+    if (this.variables.has(name)) {
+      throw new Error(`${name} is already defined.`);
     }
-    this.values.set(name, value);
+
+    if (is_constant) {
+      this.constants.add(name);
+    }
+
+    this.variables.set(name, value);
+  }
+
+  assign(name: string, value: Value) {
+    const env = this.get_env(name);
+
+    if (env.constants.has(name)) {
+      throw new Error(`cannot assign a value to a constant: ${name}`);
+    }
+
+    env.variables.set(name, value);
+  }
+
+  get_env(variable_name: string): Environment {
+    if (this.variables.has(variable_name)) {
+      return this;
+    }
+
+    if (this.parent == undefined) {
+      throw new Error(`${variable_name} doesn't exists.`);
+    }
+
+    return this.parent.get_env(variable_name);
   }
 }

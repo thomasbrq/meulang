@@ -16,7 +16,7 @@ import { Parser } from "./src/parser/parser";
   const env = new Environment();
   const result = evaluate(program, env);
 
-  console.log(result);
+  console.log("result: ", result);
 })();
 
 // (async function main() {

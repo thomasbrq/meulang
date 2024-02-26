@@ -1,8 +1,10 @@
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
+  AssignmentExpression,
   BinaryExpression,
   Expression,
+  Indentifier,
   NumericLiteral,
   Program,
   Statement,
@@ -61,13 +63,35 @@ export class Parser {
       case TokenType.VAR: {
         return this.parse_declaration();
       }
+      case TokenType.IDENTIFIER: {
+        return this.parse_assign();
+      }
       default: {
         return this.parse_expression();
       }
     }
   }
 
-  private parse_declaration() {
+  private parse_assign(): Expression {
+    const left = this.parse_primary_expression();
+
+    this.expect(TokenType.ASSIGN, `= expected, got ${this.currentToken.value}`);
+
+    const right = this.parse_expression();
+    if (right == null) {
+      throw new Error("expression expected.");
+    }
+    this.expect(TokenType.SEMI_COLON, "semicolon expected.");
+
+    return {
+      type: "AssignmentExpression",
+      left,
+      right,
+      operator: "=",
+    } as AssignmentExpression;
+  }
+
+  private parse_declaration(): VariableDeclaration {
     const current_token = this.currentToken;
     const constant = current_token.type == TokenType.CONST;
 
@@ -164,6 +188,16 @@ export class Parser {
 
         return expression;
       }
+      case TokenType.IDENTIFIER: {
+        const identifier = {
+          type: "Identifier",
+          name: this.currentToken.value,
+        } as Indentifier;
+
+        this.eat();
+
+        return identifier;
+      }
       case TokenType.OPEN_PAREN: {
         this.eat();
         const value = this.parse_expression();
@@ -171,8 +205,9 @@ export class Parser {
         return value;
       }
       default: {
+        console.log(this.currentToken);
         console.error(
-          `Unexpected token: type=${token.type}, value=${token.value}`,
+          `Unexpected token: type: ${this.currentToken.type}, value: ${this.currentToken.value}`,
         );
         process.exit(1);
       }

@@ -1,7 +1,8 @@
-import type { AssignmentOperator } from "typescript";
 import type {
+  AssignmentExpression,
   BinaryExpression,
   BinaryExpressionType,
+  Indentifier,
   NumericLiteral,
   Program,
   Statement,
@@ -92,13 +93,44 @@ function evaluate_variable_declaration(
     value = evaluate(statement.value, env);
   }
 
-  if (value == null)
+  if (value == null) {
     return {
       type: "null",
       value: "null",
-    } as Value;
+    } as NullValue;
+  }
 
-  env.set(statement.name, value);
+  env.declare(statement.name, value, statement.constant);
+
+  return {
+    type: "number",
+    value: value.value,
+  } as NumberValue;
+}
+
+function evaluate_assignment_expression(
+  node: AssignmentExpression,
+  env: Environment,
+): Value {
+  const name = node.left.name;
+  const value = evaluate(node.right, env);
+
+  env.assign(name, value);
+
+  return {
+    type: "number",
+    value: value.value,
+  } as NumberValue;
+}
+
+function evaluate_identifier(identifier: Indentifier, env: Environment): Value {
+  const value = env.get(identifier.name);
+  if (value == null) {
+    console.error(`${identifier.name} not found.`);
+    process.exit(1);
+  }
+
+  return value;
 }
 
 export function evaluate(node: Statement, env: Environment): Value {
@@ -112,12 +144,18 @@ export function evaluate(node: Statement, env: Environment): Value {
     case "VariableDeclaration": {
       return evaluate_variable_declaration(node as VariableDeclaration, env);
     }
+    case "AssignmentExpression": {
+      return evaluate_assignment_expression(node as AssignmentExpression, env);
+    }
     case "NumericLiteral": {
       const n = node as NumericLiteral;
       return {
         type: "number",
         value: n.value,
       } as NumberValue;
+    }
+    case "Identifier": {
+      return evaluate_identifier(node as Indentifier, env);
     }
     default: {
       console.error(`${node.type} not implemented.`);
