@@ -11,6 +11,10 @@ class LexerTest extends Lexer {
     return this.is_digit(character);
   }
 
+  IsAlphaNum(character: string): boolean {
+    return this.is_alphanum(character);
+  }
+
   ParseDigits(): string {
     return this.parse_digits();
   }
@@ -53,6 +57,25 @@ describe("Lexer class", () => {
       expect(lexer.IsDigit("O")).toBe(false);
       expect(lexer.IsDigit("o")).toBe(false);
       expect(lexer.IsDigit("😀")).toBe(false);
+    });
+  });
+
+  describe("is_alphanum", () => {
+    const lexer = new LexerTest("abc");
+    it("should return true when valid alphanum", () => {
+      expect(lexer.IsAlphaNum("a")).toBe(true);
+      expect(lexer.IsAlphaNum("x")).toBe(true);
+      expect(lexer.IsAlphaNum("Z")).toBe(true);
+      expect(lexer.IsAlphaNum("D")).toBe(true);
+      expect(lexer.IsAlphaNum("1")).toBe(true);
+      expect(lexer.IsAlphaNum("5")).toBe(true);
+      expect(lexer.IsAlphaNum("_")).toBe(true);
+    });
+    it("should return false when invalid alphanum", () => {
+      expect(lexer.IsAlphaNum("-")).toBe(false);
+      expect(lexer.IsAlphaNum("((")).toBe(false);
+      expect(lexer.IsAlphaNum(";")).toBe(false);
+      expect(lexer.IsAlphaNum(";")).toBe(false);
     });
   });
 
@@ -117,6 +140,42 @@ describe("Lexer class", () => {
         { expectedType: TokenType.INT, expectedValue: "55" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
         { expectedType: TokenType.INT, expectedValue: "12" },
+      ];
+      testTokens(lexer, expecteds);
+    });
+
+    test("basic tokens", () => {
+      const lexer = new LexerTest("()+-*/1;=");
+      const expecteds: TestTokenType[] = [
+        { expectedType: TokenType.OPEN_PAREN, expectedValue: "(" },
+        { expectedType: TokenType.CLOSED_PAREN, expectedValue: ")" },
+        { expectedType: TokenType.PLUS, expectedValue: "+" },
+        { expectedType: TokenType.MINUS, expectedValue: "-" },
+        { expectedType: TokenType.MULT, expectedValue: "*" },
+        { expectedType: TokenType.DIV, expectedValue: "/" },
+        { expectedType: TokenType.INT, expectedValue: "1" },
+        { expectedType: TokenType.SEMI_COLON, expectedValue: ";" },
+        { expectedType: TokenType.ASSIGN, expectedValue: "=" },
+        { expectedType: TokenType.EOF, expectedValue: "EOF" },
+      ];
+      testTokens(lexer, expecteds);
+    });
+
+    test("keyword tokens", () => {
+      const lexer = new LexerTest("const var");
+      const expecteds: TestTokenType[] = [
+        { expectedType: TokenType.CONST, expectedValue: "const" },
+        { expectedType: TokenType.VAR, expectedValue: "var" },
+        { expectedType: TokenType.EOF, expectedValue: "EOF" },
+      ];
+      testTokens(lexer, expecteds);
+    });
+
+    test("identifiers", () => {
+      const lexer = new LexerTest("  abc constvar");
+      const expecteds: TestTokenType[] = [
+        { expectedType: TokenType.IDENTIFIER, expectedValue: "abc" },
+        { expectedType: TokenType.IDENTIFIER, expectedValue: "constvar" },
       ];
       testTokens(lexer, expecteds);
     });

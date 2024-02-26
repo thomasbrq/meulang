@@ -1,4 +1,4 @@
-import { TokenType, type Token } from "./token";
+import { TokenType, type Token, keywords } from "./token";
 
 export type LexerType = {
   source: string;
@@ -51,15 +51,45 @@ export class Lexer {
     return character >= "0" && character <= "9";
   }
 
+  protected is_alpha(character: string): boolean {
+    return (
+      (character >= "a" && character <= "z") ||
+      (character >= "A" && character <= "Z") ||
+      character == "_"
+    );
+  }
+
+  protected is_alphanum(character: string): boolean {
+    if (character.length > 1) {
+      return false;
+    }
+
+    const is_alpha = this.is_alpha(character);
+    const is_num = this.is_digit(character);
+
+    return is_alpha || is_num;
+  }
+
   protected parse_digits(): string {
-    let result_string = "";
+    let string = "";
 
     while (!this.is_eof() && this.is_digit(this.data.character)) {
-      result_string += this.data.character;
+      string += this.data.character;
       this.read_character();
     }
 
-    return result_string;
+    return string;
+  }
+
+  protected parse_string(): string {
+    let string = "";
+
+    while (!this.is_eof() && this.is_alphanum(this.data.character)) {
+      string += this.data.character;
+      this.read_character();
+    }
+
+    return string;
   }
 
   protected is_whitespace(character: string): boolean {
@@ -116,17 +146,38 @@ export class Lexer {
         break;
       case "(":
         {
-          token = this.new_token(TokenType.OPEN_PAREN, "(");
+          token = this.new_token(TokenType.OPEN_PAREN, this.data.character);
         }
         break;
       case ")":
         {
-          token = this.new_token(TokenType.CLOSED_PAREN, ")");
+          token = this.new_token(TokenType.CLOSED_PAREN, this.data.character);
+        }
+        break;
+      case ";":
+        {
+          token = this.new_token(TokenType.SEMI_COLON, this.data.character);
+        }
+        break;
+      case "=":
+        {
+          token = this.new_token(TokenType.ASSIGN, this.data.character);
         }
         break;
       default: {
         if (this.is_eof()) {
           return this.new_token(TokenType.EOF, "EOF");
+        }
+
+        if (this.is_alpha(this.data.character)) {
+          let string = this.parse_string();
+
+          if (keywords.has(string)) {
+            const token = keywords.get(string);
+            return this.new_token(token as TokenType, string);
+          }
+
+          return this.new_token(TokenType.IDENTIFIER, string);
         }
 
         if (this.is_digit(this.data.character)) {

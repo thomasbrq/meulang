@@ -1,7 +1,12 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, it } from "bun:test";
 import { Lexer } from "../lexer/lexer";
 import { Parser } from "./parser";
-import type { BinaryExpression, NumericLiteral, Program } from "./types";
+import type {
+  BinaryExpression,
+  NumericLiteral,
+  Program,
+  VariableDeclaration,
+} from "./types";
 
 type TestBasicParserType = {
   expectedLeft: number;
@@ -123,6 +128,52 @@ describe("Parser", () => {
       expect(left_left.value).toBe(1);
       let left_right = left.right as NumericLiteral;
       expect(left_right.value).toBe(2);
+    });
+
+    test("var declaration no value", () => {
+      const lexer = new Lexer("var a;");
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+
+      expect(program.type).toBe("Program");
+
+      const body = program.body[0] as VariableDeclaration;
+
+      expect(body.type).toBe("VariableDeclaration");
+      expect(body.name).toBe("a");
+      expect(body.constant).toBe(false);
+    });
+
+    test("var declaration with value", () => {
+      const lexer = new Lexer("var a = 5;");
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+
+      expect(program.type).toBe("Program");
+
+      const body = program.body[0] as VariableDeclaration;
+
+      expect(body.type).toBe("VariableDeclaration");
+      expect(body.name).toBe("a");
+      expect(body.value?.type).toBe("NumericLiteral");
+      expect(body.value?.value).toBe(5);
+      expect(body.constant).toBe(false);
+    });
+
+    test("const declaration with value", () => {
+      const lexer = new Lexer("const a = 10;");
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+
+      expect(program.type).toBe("Program");
+
+      const body = program.body[0] as VariableDeclaration;
+
+      expect(body.type).toBe("VariableDeclaration");
+      expect(body.name).toBe("a");
+      expect(body.value?.type).toBe("NumericLiteral");
+      expect(body.value?.value).toBe(10);
+      expect(body.constant).toBe(true);
     });
   });
 });
