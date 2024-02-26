@@ -67,11 +67,6 @@ export class Parser {
     }
   }
 
-  /**
-    let a;
-    let a = 5;
-    const b;
-  */
   private parse_declaration() {
     const current_token = this.currentToken;
     const constant = current_token.type == TokenType.CONST;

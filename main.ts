@@ -1,3 +1,4 @@
+import { Environment } from "./src/interpreter/environment";
 import { evaluate } from "./src/interpreter/interpreter";
 import { Lexer } from "./src/lexer/lexer";
 import { Parser } from "./src/parser/parser";
@@ -8,9 +9,14 @@ import { Parser } from "./src/parser/parser";
 
   const source = await file.text();
   const lexer = new Lexer(source);
+
   const parser = new Parser(lexer);
   const program = parser.parse();
-  console.log(program, true);
+
+  const env = new Environment();
+  const result = evaluate(program, env);
+
+  console.log(result);
 })();
 
 // (async function main() {
