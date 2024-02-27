@@ -2,7 +2,7 @@ import type {
   AssignmentExpression,
   BinaryExpression,
   BinaryExpressionType,
-  Indentifier,
+  Identifier,
   NumericLiteral,
   Program,
   Statement,
@@ -123,7 +123,7 @@ function evaluate_assignment_expression(
   } as NumberValue;
 }
 
-function evaluate_identifier(identifier: Indentifier, env: Environment): Value {
+function evaluate_identifier(identifier: Identifier, env: Environment): Value {
   const value = env.get(identifier.name);
   if (value == null) {
     console.error(`${identifier.name} not found.`);
@@ -155,7 +155,7 @@ export function evaluate(node: Statement, env: Environment): Value {
       } as NumberValue;
     }
     case "Identifier": {
-      return evaluate_identifier(node as Indentifier, env);
+      return evaluate_identifier(node as Identifier, env);
     }
     default: {
       console.error(`${node.type} not implemented.`);

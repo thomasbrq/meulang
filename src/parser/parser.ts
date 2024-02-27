@@ -4,7 +4,7 @@ import type {
   AssignmentExpression,
   BinaryExpression,
   Expression,
-  Indentifier,
+  Identifier,
   NumericLiteral,
   Program,
   Statement,
@@ -192,7 +192,7 @@ export class Parser {
         const identifier = {
           type: "Identifier",
           name: this.currentToken.value,
-        } as Indentifier;
+        } as Identifier;
 
         this.eat();
 

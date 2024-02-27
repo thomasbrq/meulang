@@ -29,14 +29,14 @@ export interface NumericLiteral extends Expression {
   value: number;
 }
 
-export interface Indentifier extends Expression {
+export interface Identifier extends Expression {
   type: "Identifier";
   name: string;
 }
 
 export interface AssignmentExpression extends Expression {
   type: "AssignmentExpression";
-  left: Indentifier;
+  left: Identifier;
   right: Expression;
   operator: string;
 }
