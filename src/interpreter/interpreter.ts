@@ -94,7 +94,7 @@ function evaluate_variable_declaration(
   }
 
   if (value == null) {
-    return {
+    value = {
       type: "null",
       value: "null",
     } as NullValue;

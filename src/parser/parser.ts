@@ -108,6 +108,8 @@ export class Parser {
         process.exit(1);
       }
 
+      this.eat();
+
       // TODO: assign 'null' by default.
       return {
         type: "VariableDeclaration",
