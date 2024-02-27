@@ -3,6 +3,7 @@ import { evaluate } from "./src/interpreter/interpreter";
 import type {
   NativeFunctionValue,
   NullValue,
+  NumberValue,
   Value,
 } from "./src/interpreter/types";
 import { Lexer } from "./src/lexer/lexer";
@@ -20,6 +21,16 @@ const print = {
   },
 } as NativeFunctionValue;
 
+const get_one = {
+  type: "native-fn",
+  call: (args: Value[], env: Environment) => {
+    return {
+      type: "number",
+      value: 1,
+    } as NumberValue;
+  },
+} as NativeFunctionValue;
+
 (async function main() {
   const path = "test.meu";
   const file = Bun.file(path);
@@ -33,6 +44,7 @@ const print = {
   const env = new Environment();
 
   env.declare("print", print, true);
+  env.declare("get_one", get_one, true);
 
   const result = evaluate(program, env);
 

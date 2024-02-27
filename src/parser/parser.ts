@@ -1,4 +1,3 @@
-import { isTokenKind } from "typescript";
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
@@ -193,10 +192,6 @@ export class Parser {
       }
 
       this.eat();
-      this.expect(
-        TokenType.SEMI_COLON,
-        "semi-colon expected after a function call.",
-      );
 
       return {
         type: "CallExpression",
