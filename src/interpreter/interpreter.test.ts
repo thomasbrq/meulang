@@ -2,6 +2,7 @@ import { describe, expect, it, test } from "bun:test";
 import { Lexer } from "../lexer/lexer";
 import { Parser } from "../parser/parser";
 import { evaluate } from "./interpreter";
+import { Environment } from "./environment";
 
 describe("Interpreter", () => {
   test("basic mult", () => {
@@ -9,7 +10,9 @@ describe("Interpreter", () => {
     const parser = new Parser(lexer);
     const program = parser.parse();
 
-    const result = evaluate(program);
+    const env = new Environment();
+
+    const result = evaluate(program, env);
     expect(result.value).toBe(2);
     expect(result.type).toBe("number");
   });
@@ -18,7 +21,8 @@ describe("Interpreter", () => {
     const parser = new Parser(lexer);
     const program = parser.parse();
 
-    const result = evaluate(program);
+    const env = new Environment();
+    const result = evaluate(program, env);
     expect(result.value).toBe(52);
     expect(result.type).toBe("number");
   });
@@ -27,7 +31,8 @@ describe("Interpreter", () => {
     const parser = new Parser(lexer);
     const program = parser.parse();
 
-    const result = evaluate(program);
+    const env = new Environment();
+    const result = evaluate(program, env);
     expect(result.value).toBe(2030);
     expect(result.type).toBe("number");
   });
@@ -36,7 +41,8 @@ describe("Interpreter", () => {
     const parser = new Parser(lexer);
     const program = parser.parse();
 
-    const result = evaluate(program);
+    const env = new Environment();
+    const result = evaluate(program, env);
     expect(result.value).toBe(20);
     expect(result.type).toBe("number");
   });
@@ -45,7 +51,8 @@ describe("Interpreter", () => {
     const parser = new Parser(lexer);
     const program = parser.parse();
 
-    const result = evaluate(program);
+    const env = new Environment();
+    const result = evaluate(program, env);
     expect(result.value).toBe(30);
     expect(result.type).toBe("number");
   });
@@ -54,7 +61,8 @@ describe("Interpreter", () => {
     const parser = new Parser(lexer);
     const program = parser.parse();
 
-    const result = evaluate(program);
+    const env = new Environment();
+    const result = evaluate(program, env);
     expect(result.value).toBe("null");
     expect(result.type).toBe("null");
   });
