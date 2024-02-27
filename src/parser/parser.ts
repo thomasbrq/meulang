@@ -1,3 +1,4 @@
+import { isTokenKind } from "typescript";
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
@@ -63,32 +64,31 @@ export class Parser {
       case TokenType.VAR: {
         return this.parse_declaration();
       }
-      case TokenType.IDENTIFIER: {
-        return this.parse_assign();
-      }
       default: {
         return this.parse_expression();
       }
     }
   }
 
+  private parse_expression(): Expression {
+    return this.parse_assign();
+  }
+
   private parse_assign(): Expression {
-    const left = this.parse_primary_expression();
+    const left = this.parse_addsub_expression();
 
-    this.expect(TokenType.ASSIGN, `= expected, got ${this.currentToken.value}`);
-
-    const right = this.parse_expression();
-    if (right == null) {
-      throw new Error("expression expected.");
+    if (this.currentToken.type == TokenType.ASSIGN) {
+      this.eat();
+      const right = this.parse_addsub_expression();
+      return {
+        type: "AssignmentExpression",
+        left,
+        right,
+        operator: "=",
+      } as AssignmentExpression;
     }
-    this.expect(TokenType.SEMI_COLON, "semicolon expected.");
 
-    return {
-      type: "AssignmentExpression",
-      left,
-      right,
-      operator: "=",
-    } as AssignmentExpression;
+    return left;
   }
 
   private parse_declaration(): VariableDeclaration {
@@ -132,10 +132,6 @@ export class Parser {
     } as VariableDeclaration;
   }
 
-  private parse_expression(): Expression {
-    return this.parse_addsub_expression();
-  }
-
   private parse_addsub_expression(): Expression {
     let left = this.parse_multdiv_expression();
 
@@ -157,14 +153,14 @@ export class Parser {
   }
 
   private parse_multdiv_expression(): Expression {
-    let left = this.parse_primary_expression();
+    let left = this.parse_func_call();
 
     while (this.currentToken.value == "*" || this.currentToken.value == "/") {
       let op = this.currentToken;
 
       this.eat();
 
-      const right = this.parse_primary_expression();
+      const right = this.parse_func_call();
       left = {
         type: "BinaryExpression",
         left,
@@ -174,6 +170,10 @@ export class Parser {
     }
 
     return left;
+  }
+
+  private parse_func_call() {
+    return this.parse_primary_expression();
   }
 
   private parse_primary_expression(): Expression {
@@ -202,7 +202,7 @@ export class Parser {
       }
       case TokenType.OPEN_PAREN: {
         this.eat();
-        const value = this.parse_expression();
+        const value = this.parse_addsub_expression();
         this.expect(TokenType.CLOSED_PAREN, "No closed parenthesis found.");
         return value;
       }
