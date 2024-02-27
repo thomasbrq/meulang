@@ -2,6 +2,8 @@ import type {
   AssignmentExpression,
   BinaryExpression,
   BinaryExpressionType,
+  CallExpression,
+  Expression,
   Identifier,
   NumericLiteral,
   Program,
@@ -9,7 +11,12 @@ import type {
   VariableDeclaration,
 } from "../parser/types";
 import type { Environment } from "./environment";
-import type { NullValue, NumberValue, Value } from "./types";
+import type {
+  NativeFunctionValue,
+  NullValue,
+  NumberValue,
+  Value,
+} from "./types";
 
 function evaluate_program(program: Program, env: Environment): Value {
   let evaluated: Value = {
@@ -133,6 +140,23 @@ function evaluate_identifier(identifier: Identifier, env: Environment): Value {
   return value;
 }
 
+function evaluate_call_expression(
+  expression: CallExpression,
+  env: Environment,
+): Value {
+  const function_expression = evaluate(expression.callee, env);
+  const args = expression.arguments.map((arg: Expression) =>
+    evaluate(arg, env),
+  );
+
+  if (function_expression.type == "native-fn") {
+    return (function_expression as NativeFunctionValue).call(args, env);
+  }
+
+  console.error(`${expression.callee.name} is not a function`);
+  process.exit(1);
+}
+
 export function evaluate(node: Statement, env: Environment): Value {
   switch (node.type) {
     case "Program": {
@@ -146,6 +170,9 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "AssignmentExpression": {
       return evaluate_assignment_expression(node as AssignmentExpression, env);
+    }
+    case "CallExpression": {
+      return evaluate_call_expression(node as CallExpression, env);
     }
     case "NumericLiteral": {
       const n = node as NumericLiteral;

@@ -1,7 +1,24 @@
 import { Environment } from "./src/interpreter/environment";
 import { evaluate } from "./src/interpreter/interpreter";
+import type {
+  NativeFunctionValue,
+  NullValue,
+  Value,
+} from "./src/interpreter/types";
 import { Lexer } from "./src/lexer/lexer";
 import { Parser } from "./src/parser/parser";
+
+const print = {
+  type: "native-fn",
+  call: (args: Value[], env: Environment) => {
+    const a = args.map((arg: Value) => arg.value);
+    console.log(...a);
+    return {
+      type: "null",
+      value: "null",
+    } as NullValue;
+  },
+} as NativeFunctionValue;
 
 (async function main() {
   const path = "test.meu";
@@ -14,9 +31,12 @@ import { Parser } from "./src/parser/parser";
   const program = parser.parse();
 
   const env = new Environment();
+
+  env.declare("print", print, true);
+
   const result = evaluate(program, env);
 
-  console.log("result: ", result);
+  // console.log("result: ", result);
 })();
 
 // (async function main() {

@@ -4,6 +4,7 @@ import { TokenType, type Token } from "../lexer/token";
 import type {
   AssignmentExpression,
   BinaryExpression,
+  CallExpression,
   Expression,
   Identifier,
   NumericLiteral,
@@ -172,8 +173,39 @@ export class Parser {
     return left;
   }
 
+  private are_equals(left: TokenType, right: TokenType) {
+    return left == right;
+  }
+
   private parse_func_call() {
-    return this.parse_primary_expression();
+    const identifier = this.parse_primary_expression();
+
+    if (this.currentToken.type == TokenType.OPEN_PAREN) {
+      this.eat();
+
+      let args: Expression[] = [];
+      while (!this.are_equals(this.currentToken.type, TokenType.CLOSED_PAREN)) {
+        const arg = this.parse_expression();
+        if (this.are_equals(this.currentToken.type, TokenType.COMA)) {
+          this.eat();
+        }
+        args.push(arg);
+      }
+
+      this.eat();
+      this.expect(
+        TokenType.SEMI_COLON,
+        "semi-colon expected after a function call.",
+      );
+
+      return {
+        type: "CallExpression",
+        callee: identifier,
+        arguments: args,
+      } as CallExpression;
+    }
+
+    return identifier;
   }
 
   private parse_primary_expression(): Expression {

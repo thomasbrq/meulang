@@ -17,6 +17,7 @@ export enum TokenType {
   CONST = "CONST",
   ASSIGN = "=",
   SEMI_COLON = ";",
+  COMA = ",",
 }
 
 export type Token = {

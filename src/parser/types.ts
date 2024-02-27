@@ -40,3 +40,9 @@ export interface AssignmentExpression extends Expression {
   right: Expression;
   operator: string;
 }
+
+export interface CallExpression extends Expression {
+  type: "CallExpression";
+  callee: Identifier;
+  arguments: Expression[];
+}
