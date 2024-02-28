@@ -3,6 +3,7 @@ import type {
   BinaryExpression,
   BinaryExpressionType,
   CallExpression,
+  CallStatement,
   Expression,
   Identifier,
   NumericLiteral,
@@ -157,6 +158,10 @@ function evaluate_call_expression(
   process.exit(1);
 }
 
+export function evaluate_call_statement(node: CallStatement, env: Environment) {
+  return evaluate(node.expression, env);
+}
+
 export function evaluate(node: Statement, env: Environment): Value {
   switch (node.type) {
     case "Program": {
@@ -170,6 +175,9 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "AssignmentExpression": {
       return evaluate_assignment_expression(node as AssignmentExpression, env);
+    }
+    case "CallStatement": {
+      return evaluate_call_statement(node as CallStatement, env);
     }
     case "CallExpression": {
       return evaluate_call_expression(node as CallExpression, env);
