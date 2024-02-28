@@ -1,1 +1,1 @@
-print(get_one(1, get_one()), 1)
+print(get_one(1, get_one()), 1);

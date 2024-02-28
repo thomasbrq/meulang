@@ -141,10 +141,14 @@ export class Parser {
       this.currentToken.type == TokenType.IDENTIFIER &&
       this.nextToken.type == TokenType.OPEN_PAREN
     ) {
-      return {
+      const statement = {
         type: "CallStatement",
         expression: this.parse_call_expression(),
       } as CallStatement;
+
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return statement;
     }
 
     return this.parse_addsub_expression();

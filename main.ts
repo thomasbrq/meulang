@@ -41,7 +41,7 @@ const get_one = {
   const parser = new Parser(lexer);
   const program = parser.parse();
 
-  console.log(program, true);
+  // console.log(program, true);
 
   const env = new Environment();
 
