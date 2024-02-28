@@ -4,6 +4,7 @@ import type {
   AssignmentExpression,
   BinaryExpression,
   CallExpression,
+  CallStatement,
   Expression,
   Identifier,
   NumericLiteral,
@@ -75,11 +76,11 @@ export class Parser {
   }
 
   private parse_assign(): Expression {
-    const left = this.parse_addsub_expression();
+    const left = this.parse_func_call();
 
     if (this.currentToken.type == TokenType.ASSIGN) {
       this.eat();
-      const right = this.parse_addsub_expression();
+      const right = this.parse_func_call();
       return {
         type: "AssignmentExpression",
         left,
@@ -89,6 +90,64 @@ export class Parser {
     }
 
     return left;
+  }
+
+  private parse_call_arguments(): Expression[] {
+    let args: Expression[] = [];
+
+    if (this.currentToken.type == TokenType.CLOSED_PAREN) {
+      this.eat();
+      return args;
+    }
+
+    do {
+      if (this.currentToken.type == TokenType.IDENTIFIER)
+        args.push(this.parse_call_expression());
+      else args.push(this.parse_addsub_expression());
+
+      if (this.currentToken.type == TokenType.COMA) {
+        this.eat();
+      }
+    } while (this.currentToken.type != TokenType.CLOSED_PAREN);
+
+    this.eat();
+
+    return args;
+  }
+
+  private tokens_equals(received: string, expected: string) {
+    return received == expected;
+  }
+
+  private parse_call_expression(): Expression {
+    if (this.currentToken.type == TokenType.IDENTIFIER) {
+      const identifier = this.parse_primary_expression();
+      if (this.tokens_equals(this.currentToken.type, TokenType.OPEN_PAREN)) {
+        this.eat();
+        return {
+          type: "CallExpression",
+          callee: identifier,
+          arguments: this.parse_call_arguments(),
+        } as CallExpression;
+      }
+      return identifier;
+    }
+
+    return this.parse_addsub_expression();
+  }
+
+  private parse_func_call(): Statement {
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.OPEN_PAREN
+    ) {
+      return {
+        type: "CallStatement",
+        expression: this.parse_call_expression(),
+      } as CallStatement;
+    }
+
+    return this.parse_addsub_expression();
   }
 
   private parse_declaration(): VariableDeclaration {
@@ -153,14 +212,14 @@ export class Parser {
   }
 
   private parse_multdiv_expression(): Expression {
-    let left = this.parse_func_call();
+    let left = this.parse_primary_expression();
 
     while (this.currentToken.value == "*" || this.currentToken.value == "/") {
       let op = this.currentToken;
 
       this.eat();
 
-      const right = this.parse_func_call();
+      const right = this.parse_primary_expression();
       left = {
         type: "BinaryExpression",
         left,
@@ -170,37 +229,6 @@ export class Parser {
     }
 
     return left;
-  }
-
-  private are_equals(left: TokenType, right: TokenType) {
-    return left == right;
-  }
-
-  private parse_func_call() {
-    const identifier = this.parse_primary_expression();
-
-    if (this.currentToken.type == TokenType.OPEN_PAREN) {
-      this.eat();
-
-      let args: Expression[] = [];
-      while (!this.are_equals(this.currentToken.type, TokenType.CLOSED_PAREN)) {
-        const arg = this.parse_expression();
-        if (this.are_equals(this.currentToken.type, TokenType.COMA)) {
-          this.eat();
-        }
-        args.push(arg);
-      }
-
-      this.eat();
-
-      return {
-        type: "CallExpression",
-        callee: identifier,
-        arguments: args,
-      } as CallExpression;
-    }
-
-    return identifier;
   }
 
   private parse_primary_expression(): Expression {
