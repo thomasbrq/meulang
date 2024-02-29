@@ -90,9 +90,14 @@ export class Parser {
     this.expect(TokenType.OPEN_BRACE, "{ expected.");
 
     const body: Statement[] = [];
-    while (this.currentToken.type != TokenType.CLOSED_BRACE) {
+    while (
+      this.currentToken.type != TokenType.CLOSED_BRACE &&
+      this.currentToken.type != TokenType.EOF
+    ) {
       body.push(this.parse_statement());
     }
+
+    this.expect(TokenType.CLOSED_BRACE, "} expected.");
 
     return {
       type: "FunctionDeclaration",
