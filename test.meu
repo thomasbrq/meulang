@@ -1,3 +1,7 @@
-const total = add(3, add(5, 5));
+var a = add(1, 5 * add(5,5) ) + add(2,2) * 45;
 
-print(total + add(1,1));
+const H = 850;
+const J = add(7,7) * 777 + a;
+
+const x = (a + add(1,1) * 5) * 10 + H / J;
+print(print(x * 10));

@@ -95,12 +95,17 @@ export class Parser {
     if (this.currentToken.type == TokenType.ASSIGN) {
       this.eat();
       const right = this.parse_addsub_expression();
-      return {
+
+      const expr = {
         type: "AssignmentExpression",
         left,
         right,
         operator: "=",
       } as AssignmentExpression;
+
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return expr;
     }
 
     return left;
