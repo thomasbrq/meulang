@@ -5,6 +5,8 @@ export enum TokenType {
 
   OPEN_PAREN = "(",
   CLOSED_PAREN = ")",
+  OPEN_BRACE = "{",
+  CLOSED_BRACE = "}",
 
   INT = "INT",
   PLUS = "+",
@@ -13,6 +15,7 @@ export enum TokenType {
   DIV = "/",
 
   IDENTIFIER = "IDENTIFIER",
+  FUNCTION = "FUNCTION",
   VAR = "VAR",
   CONST = "CONST",
   ASSIGN = "=",
@@ -28,4 +31,5 @@ export type Token = {
 export const keywords = new Map<string, TokenType>([
   ["var", TokenType.VAR],
   ["const", TokenType.CONST],
+  ["function", TokenType.FUNCTION],
 ]);
