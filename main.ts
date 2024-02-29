@@ -53,7 +53,7 @@ const add = {
   env.declare("print", print, true);
   env.declare("add", add, true);
 
-  const result = evaluate(program, env);
+  // const result = evaluate(program, env);
 
   // console.log("result: ", result);
 })();

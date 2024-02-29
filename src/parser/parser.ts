@@ -6,6 +6,7 @@ import type {
   CallExpression,
   CallStatement,
   Expression,
+  FunctionDeclaration,
   Identifier,
   NumericLiteral,
   Program,
@@ -68,10 +69,37 @@ export class Parser {
       case TokenType.IDENTIFIER: {
         return this.parse_identifier_statement();
       }
+      case TokenType.FUNCTION: {
+        return this.parse_declare_function();
+      }
       default: {
         return this.parse_expression();
       }
     }
+  }
+
+  private parse_declare_function(): Statement {
+    this.eat();
+
+    const identifier = this.parse_primary_expression();
+
+    this.expect(TokenType.OPEN_PAREN, "( expected.");
+
+    const args = this.parse_args();
+
+    this.expect(TokenType.OPEN_BRACE, "{ expected.");
+
+    const body: Statement[] = [];
+    while (this.currentToken.type != TokenType.CLOSED_BRACE) {
+      body.push(this.parse_statement());
+    }
+
+    return {
+      type: "FunctionDeclaration",
+      identifier: identifier,
+      parameters: args,
+      body: body,
+    } as FunctionDeclaration;
   }
 
   private parse_identifier_statement() {

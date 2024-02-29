@@ -1,7 +1,4 @@
-var a = add(1, 5 * add(5,5) ) + add(2,2) * 45;
+function add() {
+    var x = (a * 10) + add(123);
 
-const H = 850;
-const J = add(7,7) * 777 + a;
-
-const x = (a + add(1,1) * 5) * 10 + H / J;
-print(print(x * 10));
+}
