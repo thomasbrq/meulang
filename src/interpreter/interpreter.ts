@@ -155,8 +155,24 @@ function evaluate_call_expression(
   }
 
   const function_value = fn as FunctionValue;
+
+  if (args.length < function_value.parameters.length) {
+    console.error("too few arguments.");
+    process.exit(1);
+  } else if (args.length > function_value.parameters.length) {
+    console.error("too many arguments.");
+    process.exit(1);
+  }
+
+  // declare the variables in the scope.
+  function_value.parameters.forEach((param) =>
+    function_value.scope.declare(param, args.shift() as Value, false),
+  );
+
+  // execute the body statements.
   function_value.body.forEach((expr) => evaluate(expr, function_value.scope));
 
+  // TODO: implements the return keyword.
   return {
     type: "null",
     value: "null",

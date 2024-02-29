@@ -1,9 +1,7 @@
-const test = 15;
+const a = 6;
 
-function lol() {
-    var hello = 50 + test;
-    print(hello);
+function lol(a, b, c) {
+    print(a, b, c);
 }
 
-lol();
-print(hello);
+lol(1, 2, 3);
