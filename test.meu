@@ -1,4 +1,9 @@
-function add() {
-    var x = (a * 10) + add(123);
+const test = 15;
 
+function lol() {
+    var hello = 50 + test;
+    print(hello);
 }
+
+lol();
+print(hello);

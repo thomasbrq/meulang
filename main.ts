@@ -46,14 +46,14 @@ const add = {
   const parser = new Parser(lexer);
   const program = parser.parse();
 
-  console.log(program, true);
+  // console.log(program, true);
 
   const env = new Environment();
 
   env.declare("print", print, true);
   env.declare("add", add, true);
 
-  // const result = evaluate(program, env);
+  const result = evaluate(program, env);
 
   // console.log("result: ", result);
 })();
