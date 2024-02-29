@@ -1,1 +1,3 @@
-print(get_one() * (get_one() + get_one() ), get_one());
+const total = add(3, add(5, 5));
+
+print(total + add(1,1));

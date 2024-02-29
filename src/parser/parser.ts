@@ -135,14 +135,16 @@ export class Parser {
 
     this.expect(TokenType.ASSIGN, "'=' expected.");
 
-    const value = this.parse_expression();
-
-    return {
+    const declaration = {
       type: "VariableDeclaration",
       name: identifier.value,
-      value,
+      value: this.parse_expression(),
       constant,
     } as VariableDeclaration;
+
+    this.expect(TokenType.SEMI_COLON, "; expected.");
+
+    return declaration;
   }
 
   private parse_args(): Expression[] {
@@ -185,10 +187,14 @@ export class Parser {
       this.currentToken.type == TokenType.IDENTIFIER &&
       this.nextToken.type == TokenType.OPEN_PAREN
     ) {
-      return {
+      const statement = {
         type: "CallStatement",
         expression: this.parse_func_expression(),
       } as CallStatement;
+
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return statement;
     }
 
     return this.parse_primary_expression();

@@ -21,12 +21,17 @@ const print = {
   },
 } as NativeFunctionValue;
 
-const get_one = {
+const add = {
   type: "native-fn",
   call: (args: Value[], env: Environment) => {
+    const lhs = args[0].value as number;
+    const rhs = args[1].value as number;
+
+    const total = lhs + rhs;
+
     return {
       type: "number",
-      value: 1,
+      value: total,
     } as NumberValue;
   },
 } as NativeFunctionValue;
@@ -46,7 +51,7 @@ const get_one = {
   const env = new Environment();
 
   env.declare("print", print, true);
-  env.declare("get_one", get_one, true);
+  env.declare("add", add, true);
 
   const result = evaluate(program, env);
 
