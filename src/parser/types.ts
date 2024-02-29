@@ -16,6 +16,11 @@ export interface VariableDeclaration extends Statement {
 
 export interface Expression extends Statement {}
 
+export interface CallStatement extends Statement {
+  type: "CallStatement";
+  expression: CallExpression;
+}
+
 export type BinaryExpressionType = "+" | "-" | "/" | "*";
 export interface BinaryExpression extends Expression {
   type: "BinaryExpression";
@@ -39,4 +44,10 @@ export interface AssignmentExpression extends Expression {
   left: Identifier;
   right: Expression;
   operator: string;
+}
+
+export interface CallExpression extends Expression {
+  type: "CallExpression";
+  callee: Identifier;
+  arguments: Expression[];
 }
