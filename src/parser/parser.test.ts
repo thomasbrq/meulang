@@ -7,6 +7,7 @@ import type {
   CallExpression,
   CallStatement,
   Expression,
+  FunctionDeclaration,
   Identifier,
   NumericLiteral,
   Program,
@@ -308,6 +309,49 @@ describe("Parser", () => {
     test("valid program functions call", () => {
       const lexer = new Lexer(
         "var a = add(1, 5 * add(5,5) ) + add(2,2) * 45;  const H = 850; const J = add(7,7) * 777 + a;  const x = (a + add(1,1) * 5) * 10 + H / J; print(print(x * 10));",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+
+      expect(program.type).toBe("Program");
+    });
+
+    test("declare function", () => {
+      const lexer = new Lexer("function add(a) {     print(); }");
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+
+      expect(program.type).toBe("Program");
+
+      expect(program.body[0].type).toBe("FunctionDeclaration");
+
+      const b1 = program.body[0] as FunctionDeclaration;
+      const identifier = b1.identifier as Identifier;
+
+      expect(identifier.type).toBe("Identifier");
+      expect(identifier.name).toBe("add");
+
+      const parameters = b1.parameters;
+
+      expect(parameters[0].type).toBe("Identifier");
+      expect(parameters[0].name).toBe("a");
+
+      const body = b1.body;
+      expect(body[0].type).toBe("CallStatement");
+
+      const bb = body[0] as CallStatement;
+
+      const expr = bb.expression;
+
+      expect(expr.type).toBe("CallExpression");
+
+      const callee = expr.callee as Identifier;
+      expect(callee.name).toBe("print");
+    });
+
+    test("valid program functions call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {     const z = 0;     var x = (a * 5) * add(1, z);     print(a, x * 10 + add(5,5)); }",
       );
       const parser = new Parser(lexer);
       const program = parser.parse();

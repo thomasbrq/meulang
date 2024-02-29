@@ -1,3 +1,5 @@
+import type { System } from "typescript";
+
 export interface Statement {
   type: string;
 }
@@ -14,12 +16,19 @@ export interface VariableDeclaration extends Statement {
   constant: boolean;
 }
 
-export interface Expression extends Statement {}
-
 export interface CallStatement extends Statement {
   type: "CallStatement";
   expression: CallExpression;
 }
+
+export interface FunctionDeclaration extends Statement {
+  type: "FunctionDeclaration";
+  identifier: Identifier;
+  parameters: Identifier[];
+  body: Statement[];
+}
+
+export interface Expression extends Statement {}
 
 export type BinaryExpressionType = "+" | "-" | "/" | "*";
 export interface BinaryExpression extends Expression {

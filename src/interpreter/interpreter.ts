@@ -5,14 +5,16 @@ import type {
   CallExpression,
   CallStatement,
   Expression,
+  FunctionDeclaration,
   Identifier,
   NumericLiteral,
   Program,
   Statement,
   VariableDeclaration,
 } from "../parser/types";
-import type { Environment } from "./environment";
+import { Environment } from "./environment";
 import type {
+  FunctionValue,
   NativeFunctionValue,
   NullValue,
   NumberValue,
@@ -145,21 +147,55 @@ function evaluate_call_expression(
   expression: CallExpression,
   env: Environment,
 ): Value {
-  const function_expression = evaluate(expression.callee, env);
-  const args = expression.arguments.map((arg: Expression) =>
-    evaluate(arg, env),
-  );
+  const args = expression.arguments.map((arg) => evaluate(arg, env));
+  const fn = evaluate(expression.callee, env);
 
-  if (function_expression.type == "native-fn") {
-    return (function_expression as NativeFunctionValue).call(args, env);
+  if (fn.type == "native-fn") {
+    return (fn as NativeFunctionValue).call(args, env);
   }
 
-  console.error(`${expression.callee.name} is not a function`);
-  process.exit(1);
+  const function_value = fn as FunctionValue;
+
+  if (args.length < function_value.parameters.length) {
+    console.error("too few arguments.");
+    process.exit(1);
+  } else if (args.length > function_value.parameters.length) {
+    console.error("too many arguments.");
+    process.exit(1);
+  }
+
+  // declare the variables in the scope.
+  function_value.parameters.forEach((param) =>
+    function_value.scope.declare(param, args.shift() as Value, false),
+  );
+
+  // execute the body statements.
+  function_value.body.forEach((expr) => evaluate(expr, function_value.scope));
+
+  // TODO: implements the return keyword.
+  return {
+    type: "null",
+    value: "null",
+  } as NullValue;
 }
 
 export function evaluate_call_statement(node: CallStatement, env: Environment) {
   return evaluate(node.expression, env);
+}
+
+function evaluate_function_declaration(
+  node: FunctionDeclaration,
+  env: Environment,
+): Value {
+  const func = {
+    type: "function",
+    name: node.identifier.name,
+    parameters: node.parameters.map((p) => p.name),
+    scope: new Environment(env),
+    body: node.body,
+  } as FunctionValue;
+
+  return env.declare(node.identifier.name, func, true);
 }
 
 export function evaluate(node: Statement, env: Environment): Value {
@@ -181,6 +217,9 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "CallExpression": {
       return evaluate_call_expression(node as CallExpression, env);
+    }
+    case "FunctionDeclaration": {
+      return evaluate_function_declaration(node as FunctionDeclaration, env);
     }
     case "NumericLiteral": {
       const n = node as NumericLiteral;

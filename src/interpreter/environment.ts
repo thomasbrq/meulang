@@ -30,6 +30,8 @@ export class Environment {
     }
 
     this.variables.set(name, value);
+
+    return value;
   }
 
   assign(name: string, value: Value) {

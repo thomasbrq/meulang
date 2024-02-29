@@ -169,6 +169,16 @@ export class Lexer {
           token = this.new_token(TokenType.COMA, this.data.character);
         }
         break;
+      case "{":
+        {
+          token = this.new_token(TokenType.OPEN_BRACE, this.data.character);
+        }
+        break;
+      case "}":
+        {
+          token = this.new_token(TokenType.CLOSED_BRACE, this.data.character);
+        }
+        break;
       default: {
         if (this.is_eof()) {
           return this.new_token(TokenType.EOF, "EOF");
