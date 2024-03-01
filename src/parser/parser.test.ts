@@ -417,5 +417,37 @@ describe("Parser", () => {
       const right = be.right as Identifier;
       expect(right.name).toBe("b");
     });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {           return a + b;       }       print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {     return a + b;     return (a+b); }  print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {     return a + b; }  const a = add(5, 5); const b = add(10, 10);  print(a, b);",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {     return a + b; }  const a = add(5, 5); const b = add(10, 10);  var c = add(a, b);  print(c);",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
   });
 });
