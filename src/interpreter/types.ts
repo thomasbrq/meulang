@@ -1,7 +1,13 @@
 import type { Statement } from "../parser/types";
 import type { Environment } from "./environment";
 
-export type ValueType = "null" | "number" | "native-fn" | "function" | "return";
+export type ValueType =
+  | "null"
+  | "number"
+  | "string"
+  | "native-fn"
+  | "function"
+  | "return";
 
 export interface Value {
   type: ValueType;
@@ -16,6 +22,11 @@ export interface NullValue extends Value {
 export interface NumberValue extends Value {
   type: "number";
   value: number;
+}
+
+export interface StringValue extends Value {
+  type: "string";
+  value: string;
 }
 
 export interface ReturnValue extends Value {

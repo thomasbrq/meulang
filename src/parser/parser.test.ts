@@ -449,5 +449,13 @@ describe("Parser", () => {
       const parser = new Parser(lexer);
       const program = parser.parse();
     });
+
+    test("valid program strings", () => {
+      const lexer = new Lexer(
+        'print("Hello world!"); print("Hello" + " " + "world!");  const a = "Hello world!"; const b = "Hello " + "world!"; print(a); print(b); print("result: ", a+b);',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
   });
 });

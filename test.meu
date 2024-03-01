@@ -1,5 +1,8 @@
-function add(a, b) {
-    return a+b;
-}
+print("Hello world!");
+print("Hello" + " " + "world!");
 
-print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48
+const a = "Hello world!";
+const b = "Hello " + "world!";
+print(a);
+print(b);
+print("result:", a+b);

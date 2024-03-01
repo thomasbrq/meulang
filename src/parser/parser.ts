@@ -1,4 +1,3 @@
-import type { SynthesizedComment } from "typescript";
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
@@ -13,6 +12,7 @@ import type {
   Program,
   ReturnStatement,
   Statement,
+  StringLiteral,
   VariableDeclaration,
 } from "./types";
 
@@ -311,6 +311,16 @@ export class Parser {
         this.eat();
 
         return expression;
+      }
+      case TokenType.STRING: {
+        let string: StringLiteral = {
+          type: "StringLiteral",
+          value: token.value,
+        };
+
+        this.eat();
+
+        return string;
       }
       case TokenType.IDENTIFIER: {
         const identifier = {

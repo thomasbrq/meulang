@@ -9,6 +9,7 @@ export enum TokenType {
   CLOSED_BRACE = "}",
 
   INT = "INT",
+  STRING = "STRING",
   PLUS = "+",
   MINUS = "-",
   MULT = "*",

@@ -175,6 +175,16 @@ describe("Lexer class", () => {
       testTokens(lexer, expecteds);
     });
 
+    test("string", () => {
+      const lexer = new LexerTest('"Hello world!" "l\nl"');
+      const expecteds: TestTokenType[] = [
+        { expectedType: TokenType.STRING, expectedValue: "Hello world!" },
+        { expectedType: TokenType.STRING, expectedValue: "l\nl" },
+        { expectedType: TokenType.EOF, expectedValue: "EOF" },
+      ];
+      testTokens(lexer, expecteds);
+    });
+
     test("identifiers", () => {
       const lexer = new LexerTest("  abc constvar");
       const expecteds: TestTokenType[] = [

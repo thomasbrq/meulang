@@ -48,6 +48,11 @@ export interface NumericLiteral extends Expression {
   value: number;
 }
 
+export interface StringLiteral extends Expression {
+  type: "StringLiteral";
+  value: string;
+}
+
 export interface Identifier extends Expression {
   type: "Identifier";
   name: string;
