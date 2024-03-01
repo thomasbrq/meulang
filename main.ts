@@ -21,21 +21,6 @@ const print = {
   },
 } as NativeFunctionValue;
 
-const add = {
-  type: "native-fn",
-  call: (args: Value[], env: Environment) => {
-    const lhs = args[0].value as number;
-    const rhs = args[1].value as number;
-
-    const total = lhs + rhs;
-
-    return {
-      type: "number",
-      value: total,
-    } as NumberValue;
-  },
-} as NativeFunctionValue;
-
 (async function main() {
   const path = "test.meu";
   const file = Bun.file(path);
@@ -46,16 +31,11 @@ const add = {
   const parser = new Parser(lexer);
   const program = parser.parse();
 
-  // console.log(program, true);
-
   const env = new Environment();
 
   env.declare("print", print, true);
-  env.declare("add", add, true);
 
-  const result = evaluate(program, env);
-
-  // console.log("result: ", result);
+  evaluate(program, env);
 })();
 
 // (async function main() {
