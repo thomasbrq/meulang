@@ -1,3 +1,4 @@
+import type { SynthesizedComment } from "typescript";
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
@@ -10,6 +11,7 @@ import type {
   Identifier,
   NumericLiteral,
   Program,
+  ReturnStatement,
   Statement,
   VariableDeclaration,
 } from "./types";
@@ -72,10 +74,28 @@ export class Parser {
       case TokenType.FUNCTION: {
         return this.parse_declare_function();
       }
+      case TokenType.RETURN: {
+        return this.parse_return_statement();
+      }
       default: {
         return this.parse_expression();
       }
     }
+  }
+
+  private parse_return_statement(): Statement {
+    this.eat();
+
+    const expression = this.parse_expression();
+
+    const statement = {
+      type: "ReturnStatement",
+      argument: expression,
+    } as ReturnStatement;
+
+    this.expect(TokenType.SEMI_COLON, "; expected.");
+
+    return statement;
   }
 
   private parse_declare_function(): Statement {

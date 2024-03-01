@@ -11,6 +11,7 @@ import type {
   Identifier,
   NumericLiteral,
   Program,
+  ReturnStatement,
   VariableDeclaration,
 } from "./types";
 
@@ -357,6 +358,96 @@ describe("Parser", () => {
       const program = parser.parse();
 
       expect(program.type).toBe("Program");
+    });
+
+    test("return statement", () => {
+      const lexer = new Lexer(" function one(a, b) {     return a + b; }");
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+
+      expect(program.type).toBe("Program");
+
+      expect(program.body[0].type).toBe("FunctionDeclaration");
+
+      const function_declaration = program.body[0] as FunctionDeclaration;
+
+      expect(function_declaration.body[0].type).toBe("ReturnStatement");
+
+      const body = function_declaration.body[0] as ReturnStatement;
+
+      expect(body.argument.type).toBe("BinaryExpression");
+      const be = body.argument as BinaryExpression;
+
+      expect(be.operator).toBe("+");
+
+      expect(be.left.type).toBe("Identifier");
+      const left = be.left as Identifier;
+      expect(left.name).toBe("a");
+
+      expect(be.right.type).toBe("Identifier");
+      const right = be.right as Identifier;
+      expect(right.name).toBe("b");
+    });
+
+    test("return statement", () => {
+      const lexer = new Lexer(" function one(a, b) {     return (a + b); }");
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+
+      expect(program.type).toBe("Program");
+
+      expect(program.body[0].type).toBe("FunctionDeclaration");
+
+      const function_declaration = program.body[0] as FunctionDeclaration;
+
+      expect(function_declaration.body[0].type).toBe("ReturnStatement");
+
+      const body = function_declaration.body[0] as ReturnStatement;
+
+      expect(body.argument.type).toBe("BinaryExpression");
+      const be = body.argument as BinaryExpression;
+
+      expect(be.operator).toBe("+");
+
+      expect(be.left.type).toBe("Identifier");
+      const left = be.left as Identifier;
+      expect(left.name).toBe("a");
+
+      expect(be.right.type).toBe("Identifier");
+      const right = be.right as Identifier;
+      expect(right.name).toBe("b");
+    });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {           return a + b;       }       print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {     return a + b;     return (a+b); }  print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {     return a + b; }  const a = add(5, 5); const b = add(10, 10);  print(a, b);",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program function call", () => {
+      const lexer = new Lexer(
+        "function add(a, b) {     return a + b; }  const a = add(5, 5); const b = add(10, 10);  var c = add(a, b);  print(c);",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
     });
   });
 });
