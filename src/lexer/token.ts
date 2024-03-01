@@ -16,6 +16,7 @@ export enum TokenType {
 
   IDENTIFIER = "IDENTIFIER",
   FUNCTION = "FUNCTION",
+  RETURN = "RETURN",
   VAR = "VAR",
   CONST = "CONST",
   ASSIGN = "=",
@@ -32,4 +33,5 @@ export const keywords = new Map<string, TokenType>([
   ["var", TokenType.VAR],
   ["const", TokenType.CONST],
   ["function", TokenType.FUNCTION],
+  ["return", TokenType.RETURN],
 ]);
