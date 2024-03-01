@@ -81,7 +81,7 @@ function evaluate_binary_expression(
   const rhs = evaluate(expression.right, env);
   const operator = expression.operator;
 
-  if (lhs.type == "number" && rhs.type == "number") {
+  if (lhs.type != "null" && rhs.type != "null") {
     return evaluate_binary_operations(
       lhs as NumberValue,
       rhs as NumberValue,
@@ -166,10 +166,11 @@ function evaluate_call_expression(
     process.exit(1);
   }
 
-  // declare the variables in the scope.
-  function_value.parameters.forEach((param) =>
-    function_value.scope.declare(param, args.shift() as Value, false),
-  );
+  // assign the variables in the scope here.
+  function_value.parameters.forEach((arg_name) => {
+    const value = args.shift() as Value;
+    function_value.scope.assign(arg_name, value);
+  });
 
   let returned_value: Value = {
     type: "null",
@@ -203,6 +204,15 @@ function evaluate_function_declaration(
     scope: new Environment(env),
     body: node.body,
   } as FunctionValue;
+
+  // declare variables in the function local scope
+  func.parameters.forEach((param) =>
+    func.scope.declare(
+      param,
+      { type: "null", value: "null" } as NullValue,
+      false,
+    ),
+  );
 
   return env.declare(node.identifier.name, func, true);
 }
