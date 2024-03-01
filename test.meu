@@ -1,5 +1,1 @@
-function add(a, b) {
-    return a+b;
-}
-
-print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48
+var a = "Hello world! 777";

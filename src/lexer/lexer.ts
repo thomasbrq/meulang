@@ -1,3 +1,4 @@
+import { isToken } from "typescript";
 import { TokenType, type Token, keywords } from "./token";
 
 export type LexerType = {
@@ -81,7 +82,7 @@ export class Lexer {
     return string;
   }
 
-  protected parse_string(): string {
+  protected parse_identifier_string(): string {
     let string = "";
 
     while (!this.is_eof() && this.is_alphanum(this.data.character)) {
@@ -134,6 +135,17 @@ export class Lexer {
     }
 
     return this.new_token(TokenType.ILLEGAL, "ILLEGAL");
+  }
+
+  private parse_string(): string {
+    let string = "";
+
+    while (!this.is_eof() && this.data.character != '"') {
+      string += this.data.character;
+      this.read_character();
+    }
+
+    return string;
   }
 
   public next_token(): Token {
@@ -193,13 +205,21 @@ export class Lexer {
           token = this.new_token(TokenType.CLOSED_BRACE, this.data.character);
         }
         break;
+      case '"':
+        {
+          this.read_character();
+          let string = this.parse_string();
+          this.read_character();
+          token = this.new_token(TokenType.STRING, string);
+        }
+        break;
       default: {
         if (this.is_eof()) {
           return this.new_token(TokenType.EOF, "EOF");
         }
 
         if (this.is_alpha(this.data.character)) {
-          let string = this.parse_string();
+          let string = this.parse_identifier_string();
 
           if (keywords.has(string)) {
             const token = keywords.get(string);
