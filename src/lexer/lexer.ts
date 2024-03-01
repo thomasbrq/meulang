@@ -205,14 +205,12 @@ export class Lexer {
           token = this.new_token(TokenType.CLOSED_BRACE, this.data.character);
         }
         break;
-      case '"':
-        {
-          this.read_character();
-          let string = this.parse_string();
-          this.read_character();
-          token = this.new_token(TokenType.STRING, string);
-        }
-        break;
+      case '"': {
+        this.read_character();
+        let string = this.parse_string();
+        this.read_character();
+        return this.new_token(TokenType.STRING, string);
+      }
       default: {
         if (this.is_eof()) {
           return this.new_token(TokenType.EOF, "EOF");
