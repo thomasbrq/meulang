@@ -28,6 +28,11 @@ export interface FunctionDeclaration extends Statement {
   body: Statement[];
 }
 
+export interface ReturnStatement extends Statement {
+  type: "ReturnStatement";
+  argument: Expression;
+}
+
 export interface Expression extends Statement {}
 
 export type BinaryExpressionType = "+" | "-" | "/" | "*";
