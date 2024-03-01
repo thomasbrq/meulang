@@ -111,6 +111,12 @@ export class Lexer {
     }
   }
 
+  private skip_comments(): void {
+    while (!this.is_eof() && this.data.character != "\n") {
+      this.read_character();
+    }
+  }
+
   protected parse_sign(character: string): Token {
     switch (character) {
       case "+": {
@@ -134,6 +140,14 @@ export class Lexer {
     let token = this.new_token(TokenType.NULL, "NULL");
 
     this.skip_whitespaces();
+
+    if (
+      this.data.character == "-" &&
+      this.data.source[this.data.nextPosition] == "-"
+    ) {
+      this.skip_comments();
+      this.skip_whitespaces();
+    }
 
     switch (this.data.character) {
       case "/":

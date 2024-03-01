@@ -1,7 +1,7 @@
-const a = 6;
+const a = 6; -- this is a comment.
 
 function lol(a, b, c) {
-    print(a, b, c);
+  print(a, b, c);
 }
 
-lol(1, 2, 3);
+-- lol(1, 2, 3); -- this line will not be executed.
