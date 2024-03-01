@@ -1,7 +1,5 @@
-const a = 6; -- this is a comment.
-
-function lol(a, b, c) {
-  print(a, b, c);
+function add(a, b) {
+    return a+b;
 }
 
--- lol(1, 2, 3); -- this line will not be executed.
+print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48
