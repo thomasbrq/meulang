@@ -11,6 +11,7 @@ import type {
   Program,
   ReturnStatement,
   Statement,
+  StringLiteral,
   VariableDeclaration,
 } from "../parser/types";
 import { Environment } from "./environment";
@@ -20,6 +21,7 @@ import type {
   NullValue,
   NumberValue,
   ReturnValue,
+  StringValue,
   Value,
 } from "./types";
 
@@ -261,6 +263,13 @@ export function evaluate(node: Statement, env: Environment): Value {
         type: "number",
         value: n.value,
       } as NumberValue;
+    }
+    case "StringLiteral": {
+      const n = node as StringLiteral;
+      return {
+        type: "string",
+        value: n.value,
+      } as StringValue;
     }
     case "Identifier": {
       return evaluate_identifier(node as Identifier, env);

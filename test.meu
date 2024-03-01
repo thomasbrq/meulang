@@ -1,1 +1,8 @@
-var a = "Hello world! 777";
+print("Hello world!");
+print("Hello" + " " + "world!");
+
+const a = "Hello world!";
+const b = "Hello " + "world!";
+print(a);
+print(b);
+print("result:", a+b);
