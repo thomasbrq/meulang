@@ -9,6 +9,7 @@ import type {
   Identifier,
   NumericLiteral,
   Program,
+  ReturnStatement,
   Statement,
   VariableDeclaration,
 } from "../parser/types";
@@ -18,6 +19,7 @@ import type {
   NativeFunctionValue,
   NullValue,
   NumberValue,
+  ReturnValue,
   Value,
 } from "./types";
 
@@ -169,14 +171,21 @@ function evaluate_call_expression(
     function_value.scope.declare(param, args.shift() as Value, false),
   );
 
-  // execute the body statements.
-  function_value.body.forEach((expr) => evaluate(expr, function_value.scope));
-
-  // TODO: implements the return keyword.
-  return {
+  let returned_value: Value = {
     type: "null",
     value: "null",
   } as NullValue;
+
+  // execute the body statements.
+  for (let i = 0; i < function_value.body.length; i++) {
+    const expr = evaluate(function_value.body[i], function_value.scope);
+    if (expr.type == "return") {
+      returned_value = expr;
+      break;
+    }
+  }
+
+  return returned_value;
 }
 
 export function evaluate_call_statement(node: CallStatement, env: Environment) {
@@ -198,6 +207,18 @@ function evaluate_function_declaration(
   return env.declare(node.identifier.name, func, true);
 }
 
+function evaluate_return_statement(
+  statement: ReturnStatement,
+  env: Environment,
+) {
+  const expr = evaluate(statement.argument as ReturnStatement, env);
+
+  return {
+    type: "return",
+    value: expr.value,
+  } as ReturnValue;
+}
+
 export function evaluate(node: Statement, env: Environment): Value {
   switch (node.type) {
     case "Program": {
@@ -214,6 +235,9 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "CallStatement": {
       return evaluate_call_statement(node as CallStatement, env);
+    }
+    case "ReturnStatement": {
+      return evaluate_return_statement(node as ReturnStatement, env);
     }
     case "CallExpression": {
       return evaluate_call_expression(node as CallExpression, env);
