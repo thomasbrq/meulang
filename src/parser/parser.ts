@@ -178,11 +178,11 @@ export class Parser {
   }
 
   private parse_assign(): Expression {
-    const left = this.parse_addsub_expression();
+    const left = this.parse_test_operators();
 
     if (this.currentToken.type == TokenType.ASSIGN) {
       this.eat();
-      const right = this.parse_addsub_expression();
+      const right = this.parse_test_operators();
 
       const expr = {
         type: "AssignmentExpression",
@@ -194,6 +194,32 @@ export class Parser {
       this.expect(TokenType.SEMI_COLON, "; expected.");
 
       return expr;
+    }
+
+    return left;
+  }
+
+  private parse_test_operators() {
+    let left = this.parse_addsub_expression();
+
+    while (
+      this.currentToken.type == TokenType.EQUAL ||
+      this.currentToken.type == TokenType.GT ||
+      this.currentToken.type == TokenType.GE ||
+      this.currentToken.type == TokenType.LT ||
+      this.currentToken.type == TokenType.LE
+    ) {
+      let op = this.currentToken;
+
+      this.eat();
+
+      const right = this.parse_addsub_expression();
+      left = {
+        type: "BinaryExpression",
+        left,
+        right,
+        operator: op.value,
+      } as BinaryExpression;
     }
 
     return left;
