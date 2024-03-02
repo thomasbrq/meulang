@@ -1,4 +1,4 @@
-import { describe, expect, test, it } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { Lexer } from "../lexer/lexer";
 import { Parser } from "./parser";
 import type {
@@ -11,7 +11,6 @@ import type {
   FunctionDeclaration,
   Identifier,
   Literal,
-  Program,
   ReturnStatement,
   VariableDeclaration,
 } from "./types";

@@ -1,4 +1,4 @@
-import type { BlockStatement, Statement } from "../parser/types";
+import type { BlockStatement } from "../parser/types";
 import type { Environment } from "./environment";
 
 export type ValueType =
