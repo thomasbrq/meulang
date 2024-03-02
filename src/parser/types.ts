@@ -1,5 +1,3 @@
-import type { System } from "typescript";
-
 export interface Statement {
   type: string;
 }
@@ -64,14 +62,9 @@ export interface BinaryExpression extends Expression {
   operator: BinaryExpressionType;
 }
 
-export interface NumericLiteral extends Expression {
-  type: "NumericLiteral";
-  value: number;
-}
-
-export interface StringLiteral extends Expression {
-  type: "StringLiteral";
-  value: string;
+export interface Literal extends Expression {
+  type: "Literal";
+  value: number | string | null;
 }
 
 export interface Identifier extends Expression {

@@ -10,11 +10,10 @@ import type {
   FunctionDeclaration,
   Identifier,
   IfStatement,
-  NumericLiteral,
+  Literal,
   Program,
   ReturnStatement,
   Statement,
-  StringLiteral,
   VariableDeclaration,
 } from "./types";
 
@@ -365,8 +364,8 @@ export class Parser {
 
     switch (token.type) {
       case TokenType.INT: {
-        let expression: NumericLiteral = {
-          type: "NumericLiteral",
+        let expression: Literal = {
+          type: "Literal",
           value: parseInt(token.value),
         };
 
@@ -375,8 +374,8 @@ export class Parser {
         return expression;
       }
       case TokenType.STRING: {
-        let string: StringLiteral = {
-          type: "StringLiteral",
+        let string: Literal = {
+          type: "Literal",
           value: token.value,
         };
 
