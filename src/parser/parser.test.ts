@@ -1,4 +1,4 @@
-import { describe, expect, test, it } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { Lexer } from "../lexer/lexer";
 import { Parser } from "./parser";
 import type {
@@ -10,8 +10,7 @@ import type {
   Expression,
   FunctionDeclaration,
   Identifier,
-  NumericLiteral,
-  Program,
+  Literal,
   ReturnStatement,
   VariableDeclaration,
 } from "./types";
@@ -21,24 +20,6 @@ type TestBasicParserType = {
   expectedRight: number;
   expectedOperator: "+" | "-" | "/" | "*";
 };
-
-function TestBasicBinaryOperation(
-  program: Program,
-  tests: TestBasicParserType[],
-) {
-  for (const test of tests) {
-    expect(program.type).toBe("Program");
-    expect(program.body[0].type).toBe("BinaryExpression");
-
-    let be = program.body[0] as BinaryExpression;
-    expect(be.operator).toBe(test.expectedOperator);
-
-    let left = be.left as NumericLiteral;
-    let right = be.right as NumericLiteral;
-    expect(left.value).toBe(test.expectedLeft);
-    expect(right.value).toBe(test.expectedRight);
-  }
-}
 
 describe("Parser", () => {
   describe("parse program", () => {
@@ -67,7 +48,7 @@ describe("Parser", () => {
 
       expect(body.type).toBe("VariableDeclaration");
       expect(body.name).toBe("a");
-      expect(body.value?.type).toBe("NumericLiteral");
+      expect(body.value?.type).toBe("Literal");
       expect(body.value?.value).toBe(5);
       expect(body.constant).toBe(false);
     });
@@ -83,7 +64,7 @@ describe("Parser", () => {
 
       expect(body.type).toBe("VariableDeclaration");
       expect(body.name).toBe("a");
-      expect(body.value?.type).toBe("NumericLiteral");
+      expect(body.value?.type).toBe("Literal");
       expect(body.value?.value).toBe(10);
       expect(body.constant).toBe(true);
     });
@@ -108,8 +89,8 @@ describe("Parser", () => {
       expect(callee.type).toBe("Identifier");
       expect(callee.name).toBe("print");
 
-      expect(args[0].type).toBe("NumericLiteral");
-      const num = args[0] as NumericLiteral;
+      expect(args[0].type).toBe("Literal");
+      const num = args[0] as Literal;
 
       expect(num.value).toBe(1);
     });
@@ -136,12 +117,12 @@ describe("Parser", () => {
       expect(callee.name).toBe("add");
       const args = expr.arguments as Expression[];
 
-      const num1 = args[0] as NumericLiteral;
-      expect(num1.type).toBe("NumericLiteral");
+      const num1 = args[0] as Literal;
+      expect(num1.type).toBe("Literal");
       expect(num1.value).toBe(1);
 
-      const num2 = args[1] as NumericLiteral;
-      expect(num2.type).toBe("NumericLiteral");
+      const num2 = args[1] as Literal;
+      expect(num2.type).toBe("Literal");
       expect(num2.value).toBe(2);
     });
 
@@ -167,12 +148,12 @@ describe("Parser", () => {
       expect(callee.name).toBe("add");
       const args = expr.arguments as Expression[];
 
-      const num1 = args[0] as NumericLiteral;
-      expect(num1.type).toBe("NumericLiteral");
+      const num1 = args[0] as Literal;
+      expect(num1.type).toBe("Literal");
       expect(num1.value).toBe(1);
 
-      const num2 = args[1] as NumericLiteral;
-      expect(num2.type).toBe("NumericLiteral");
+      const num2 = args[1] as Literal;
+      expect(num2.type).toBe("Literal");
       expect(num2.value).toBe(2);
     });
 
@@ -201,11 +182,11 @@ describe("Parser", () => {
       const callee = right.callee as Identifier;
       expect(callee.name).toBe("add");
       const args = right.arguments as Expression[];
-      expect(args[0].type).toBe("NumericLiteral");
-      expect(args[1].type).toBe("NumericLiteral");
+      expect(args[0].type).toBe("Literal");
+      expect(args[1].type).toBe("Literal");
 
-      const a = args[0] as NumericLiteral;
-      const b = args[1] as NumericLiteral;
+      const a = args[0] as Literal;
+      const b = args[1] as Literal;
       expect(a.value).toBe(5);
       expect(b.value).toBe(1);
     });
@@ -220,9 +201,9 @@ describe("Parser", () => {
       expect(program.body[0].type).toBe("VariableDeclaration");
       const declaration = program.body[0] as VariableDeclaration;
       expect(declaration.name).toBe("hello");
-      expect(declaration.value?.type).toBe("NumericLiteral");
+      expect(declaration.value?.type).toBe("Literal");
 
-      const t = declaration.value as NumericLiteral;
+      const t = declaration.value as Literal;
       expect(t.value).toBe(0);
 
       expect(program.body[1].type).toBe("AssignmentExpression");
@@ -239,11 +220,11 @@ describe("Parser", () => {
       const callee = right.callee as Identifier;
       expect(callee.name).toBe("add");
       const args = right.arguments as Expression[];
-      expect(args[0].type).toBe("NumericLiteral");
-      expect(args[1].type).toBe("NumericLiteral");
+      expect(args[0].type).toBe("Literal");
+      expect(args[1].type).toBe("Literal");
 
-      const a = args[0] as NumericLiteral;
-      const b = args[1] as NumericLiteral;
+      const a = args[0] as Literal;
+      const b = args[1] as Literal;
       expect(a.value).toBe(5);
       expect(b.value).toBe(1);
     });

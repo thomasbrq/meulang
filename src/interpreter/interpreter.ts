@@ -5,15 +5,13 @@ import type {
   BlockStatement,
   CallExpression,
   CallStatement,
-  Expression,
   FunctionDeclaration,
   Identifier,
   IfStatement,
-  NumericLiteral,
+  Literal,
   Program,
   ReturnStatement,
   Statement,
-  StringLiteral,
   VariableDeclaration,
 } from "../parser/types";
 import { Environment } from "./environment";
@@ -31,7 +29,7 @@ import type {
 function evaluate_program(program: Program, env: Environment): Value {
   let evaluated: Value = {
     type: "null",
-    value: "null",
+    value: null,
   } as NullValue;
 
   for (const statement of program.body) {
@@ -124,7 +122,7 @@ function evaluate_binary_expression(
 
   return {
     type: "null",
-    value: "null",
+    value: null,
   } as NullValue;
 }
 
@@ -141,7 +139,7 @@ function evaluate_variable_declaration(
   if (value == null) {
     value = {
       type: "null",
-      value: "null",
+      value: null,
     } as NullValue;
   }
 
@@ -207,7 +205,7 @@ function evaluate_call_expression(
 
   let returned_value: Value = {
     type: "null",
-    value: "null",
+    value: null,
   } as NullValue;
 
   // execute the body statements.
@@ -239,7 +237,7 @@ function evaluate_function_declaration(
   func.parameters.forEach((param) =>
     func.scope.declare(
       param,
-      { type: "null", value: "null" } as NullValue,
+      { type: "null", value: null } as NullValue,
       false,
     ),
   );
@@ -329,19 +327,18 @@ export function evaluate(node: Statement, env: Environment): Value {
     case "BlockStatement": {
       return evaluate_block_statement(node as BlockStatement, env);
     }
-    case "NumericLiteral": {
-      const n = node as NumericLiteral;
-      return {
-        type: "number",
-        value: n.value,
-      } as NumberValue;
-    }
-    case "StringLiteral": {
-      const n = node as StringLiteral;
-      return {
-        type: "string",
-        value: n.value,
-      } as StringValue;
+    case "Literal": {
+      const n = node as Literal;
+
+      if (typeof n.value == "number") {
+        return { type: "number", value: n.value } as NumberValue;
+      }
+
+      if (typeof n.value == "string") {
+        return { type: "string", value: n.value } as StringValue;
+      }
+
+      return { type: "null", value: null } as NullValue;
     }
     case "Identifier": {
       return evaluate_identifier(node as Identifier, env);

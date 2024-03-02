@@ -1,4 +1,4 @@
-import type { BlockStatement, Statement } from "../parser/types";
+import type { BlockStatement } from "../parser/types";
 import type { Environment } from "./environment";
 
 export type ValueType =
@@ -12,12 +12,12 @@ export type ValueType =
 
 export interface Value {
   type: ValueType;
-  value: number | string;
+  value: number | string | null;
 }
 
 export interface NullValue extends Value {
   type: "null";
-  value: "null";
+  value: null;
 }
 
 export interface NumberValue extends Value {
