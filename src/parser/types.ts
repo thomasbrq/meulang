@@ -25,12 +25,17 @@ export interface FunctionDeclaration extends Statement {
   type: "FunctionDeclaration";
   identifier: Identifier;
   parameters: Identifier[];
-  body: Statement[];
+  body: Statement;
 }
 
 export interface ReturnStatement extends Statement {
   type: "ReturnStatement";
   argument: Expression;
+}
+
+export interface BlockStatement extends Statement {
+  type: "BlockStatement";
+  body: Statement[];
 }
 
 export interface Expression extends Statement {}
