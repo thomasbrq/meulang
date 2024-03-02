@@ -2,11 +2,13 @@ import type {
   AssignmentExpression,
   BinaryExpression,
   BinaryExpressionType,
+  BlockStatement,
   CallExpression,
   CallStatement,
   Expression,
   FunctionDeclaration,
   Identifier,
+  IfStatement,
   NumericLiteral,
   Program,
   ReturnStatement,
@@ -16,6 +18,7 @@ import type {
 } from "../parser/types";
 import { Environment } from "./environment";
 import type {
+  BlockValue,
   FunctionValue,
   NativeFunctionValue,
   NullValue,
@@ -180,12 +183,9 @@ function evaluate_call_expression(
   } as NullValue;
 
   // execute the body statements.
-  for (let i = 0; i < function_value.body.length; i++) {
-    const expr = evaluate(function_value.body[i], function_value.scope);
-    if (expr.type == "return") {
-      returned_value = expr;
-      break;
-    }
+  const expr = evaluate(function_value.body, function_value.scope);
+  if (expr.type == "return") {
+    returned_value = expr;
   }
 
   return returned_value;
@@ -231,6 +231,44 @@ function evaluate_return_statement(
   } as ReturnValue;
 }
 
+function evaluate_if_statement(statement: IfStatement, env: Environment) {
+  const expr = evaluate(statement.test, env);
+
+  if (expr && expr.value) {
+    return evaluate(statement.consequent, env);
+  }
+
+  return expr;
+}
+
+function evaluate_block_statement(
+  statement: BlockStatement,
+  env: Environment,
+): Value {
+  const body = statement.body;
+
+  const block = {
+    type: "block",
+    scope: new Environment(env),
+  } as BlockValue;
+
+  let value = {
+    type: "null",
+    value: "null",
+  } as Value;
+  for (let i = 0; i < body.length; i++) {
+    const element = body[i];
+    const expr = evaluate(element, block.scope);
+
+    if (expr.type == "return") {
+      value = expr;
+      break;
+    }
+  }
+
+  return value;
+}
+
 export function evaluate(node: Statement, env: Environment): Value {
   switch (node.type) {
     case "Program": {
@@ -256,6 +294,12 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "FunctionDeclaration": {
       return evaluate_function_declaration(node as FunctionDeclaration, env);
+    }
+    case "IfStatement": {
+      return evaluate_if_statement(node as IfStatement, env);
+    }
+    case "BlockStatement": {
+      return evaluate_block_statement(node as BlockStatement, env);
     }
     case "NumericLiteral": {
       const n = node as NumericLiteral;

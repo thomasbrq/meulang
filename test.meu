@@ -1,5 +1,14 @@
-if (1) {
-    print("hello");
-    const a = 1;
-    var b = 2;
+function format_hello(a) {
+    var s = "";
+
+    if (a) {
+        s = s + "hello ";
+    }
+
+    s = s + "world";
+
+    return s;
 }
+
+print(format_hello(1)); -- return "hello world"
+print(format_hello(0)); -- return "world"

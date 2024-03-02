@@ -466,5 +466,29 @@ describe("Parser", () => {
       const parser = new Parser(lexer);
       const program = parser.parse();
     });
+
+    test("valid program if", () => {
+      const lexer = new Lexer(
+        'function test(a) {     if (a) {         print("You can pass here!");     }      print("and here"); }  test(1);',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program if", () => {
+      const lexer = new Lexer(
+        'if (1) {     print("hello"); }  if (0) {     print("world"); }',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program if", () => {
+      const lexer = new Lexer(
+        'function format_hello(a) {     var s = "";      if (a) {         s = s + "hello ";     }      s = s + "world";      return s; }  print(format_hello(1)); -- return "hello world" print(format_hello(0)); -- return "world"',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
   });
 });
