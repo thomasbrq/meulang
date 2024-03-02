@@ -1,4 +1,4 @@
-import type { Statement } from "../parser/types";
+import type { BlockStatement, Statement } from "../parser/types";
 import type { Environment } from "./environment";
 
 export type ValueType =
@@ -7,7 +7,8 @@ export type ValueType =
   | "string"
   | "native-fn"
   | "function"
-  | "return";
+  | "return"
+  | "block";
 
 export interface Value {
   type: ValueType;
@@ -45,5 +46,10 @@ export interface FunctionValue extends Value {
   name: string;
   parameters: string[];
   scope: Environment;
-  body: Statement[];
+  body: BlockStatement;
+}
+
+export interface BlockValue extends Value {
+  type: "block";
+  scope: Environment;
 }

@@ -1,8 +1,14 @@
-print("Hello world!");
-print("Hello" + " " + "world!");
+function format_hello(a) {
+    var s = "";
 
-const a = "Hello world!";
-const b = "Hello " + "world!";
-print(a);
-print(b);
-print("result:", a+b);
+    if (a) {
+        s = s + "hello ";
+    }
+
+    s = s + "world";
+
+    return s;
+}
+
+print(format_hello(1)); -- return "hello world"
+print(format_hello(0)); -- return "world"

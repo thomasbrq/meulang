@@ -3,11 +3,13 @@ import { TokenType, type Token } from "../lexer/token";
 import type {
   AssignmentExpression,
   BinaryExpression,
+  BlockStatement,
   CallExpression,
   CallStatement,
   Expression,
   FunctionDeclaration,
   Identifier,
+  IfStatement,
   NumericLiteral,
   Program,
   ReturnStatement,
@@ -77,10 +79,33 @@ export class Parser {
       case TokenType.RETURN: {
         return this.parse_return_statement();
       }
+      case TokenType.IF: {
+        return this.parse_if_statement();
+      }
       default: {
         return this.parse_expression();
       }
     }
+  }
+
+  private parse_if_statement(): Statement {
+    this.eat();
+    this.expect(TokenType.OPEN_PAREN, "( expected");
+
+    const test = this.parse_expression();
+
+    this.expect(TokenType.CLOSED_PAREN, ") expected.");
+    this.expect(TokenType.OPEN_BRACE, "{ expected");
+
+    const if_statement = {
+      type: "IfStatement",
+      test: test,
+      consequent: this.parse_block_statement(),
+    } as IfStatement;
+
+    this.expect(TokenType.CLOSED_BRACE, "} expected.");
+
+    return if_statement;
   }
 
   private parse_return_statement(): Statement {
@@ -109,13 +134,7 @@ export class Parser {
 
     this.expect(TokenType.OPEN_BRACE, "{ expected.");
 
-    const body: Statement[] = [];
-    while (
-      this.currentToken.type != TokenType.CLOSED_BRACE &&
-      this.currentToken.type != TokenType.EOF
-    ) {
-      body.push(this.parse_statement());
-    }
+    const body_statement = this.parse_block_statement();
 
     this.expect(TokenType.CLOSED_BRACE, "} expected.");
 
@@ -123,8 +142,24 @@ export class Parser {
       type: "FunctionDeclaration",
       identifier: identifier,
       parameters: args,
-      body: body,
+      body: body_statement,
     } as FunctionDeclaration;
+  }
+
+  private parse_block_statement(): Statement {
+    const body: Statement[] = [];
+
+    while (
+      this.currentToken.type != TokenType.CLOSED_BRACE &&
+      this.currentToken.type != TokenType.EOF
+    ) {
+      body.push(this.parse_statement());
+    }
+
+    return {
+      type: "BlockStatement",
+      body: body,
+    } as BlockStatement;
   }
 
   private parse_identifier_statement() {

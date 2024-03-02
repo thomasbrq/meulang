@@ -31,6 +31,8 @@ const print = {
   const parser = new Parser(lexer);
   const program = parser.parse();
 
+  // console.log(program, true);
+
   const env = new Environment();
 
   env.declare("print", print, true);

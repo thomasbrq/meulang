@@ -4,6 +4,7 @@ import { Parser } from "./parser";
 import type {
   AssignmentExpression,
   BinaryExpression,
+  BlockStatement,
   CallExpression,
   CallStatement,
   Expression,
@@ -337,8 +338,10 @@ describe("Parser", () => {
       expect(parameters[0].type).toBe("Identifier");
       expect(parameters[0].name).toBe("a");
 
-      const body = b1.body;
-      expect(body[0].type).toBe("CallStatement");
+      expect(b1.body.type).toBe("BlockStatement");
+      const bs = b1.body as BlockStatement;
+
+      const body = bs.body;
 
       const bb = body[0] as CallStatement;
 
@@ -371,14 +374,17 @@ describe("Parser", () => {
 
       const function_declaration = program.body[0] as FunctionDeclaration;
 
-      expect(function_declaration.body[0].type).toBe("ReturnStatement");
+      expect(function_declaration.body.type).toBe("BlockStatement");
 
-      const body = function_declaration.body[0] as ReturnStatement;
+      const body = function_declaration.body as BlockStatement;
 
-      expect(body.argument.type).toBe("BinaryExpression");
-      const be = body.argument as BinaryExpression;
+      expect(body.body[0].type).toBe("ReturnStatement");
+      const rs = body.body[0] as ReturnStatement;
 
-      expect(be.operator).toBe("+");
+      const args = rs.argument;
+      expect(args.type).toBe("BinaryExpression");
+
+      const be = args as BinaryExpression;
 
       expect(be.left.type).toBe("Identifier");
       const left = be.left as Identifier;
@@ -400,9 +406,12 @@ describe("Parser", () => {
 
       const function_declaration = program.body[0] as FunctionDeclaration;
 
-      expect(function_declaration.body[0].type).toBe("ReturnStatement");
+      expect(function_declaration.body.type).toBe("BlockStatement");
+      const bs = function_declaration.body as BlockStatement;
 
-      const body = function_declaration.body[0] as ReturnStatement;
+      expect(bs.body[0].type).toBe("ReturnStatement");
+
+      const body = bs.body[0] as ReturnStatement;
 
       expect(body.argument.type).toBe("BinaryExpression");
       const be = body.argument as BinaryExpression;
@@ -453,6 +462,30 @@ describe("Parser", () => {
     test("valid program strings", () => {
       const lexer = new Lexer(
         'print("Hello world!"); print("Hello" + " " + "world!");  const a = "Hello world!"; const b = "Hello " + "world!"; print(a); print(b); print("result: ", a+b);',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program if", () => {
+      const lexer = new Lexer(
+        'function test(a) {     if (a) {         print("You can pass here!");     }      print("and here"); }  test(1);',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program if", () => {
+      const lexer = new Lexer(
+        'if (1) {     print("hello"); }  if (0) {     print("world"); }',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program if", () => {
+      const lexer = new Lexer(
+        'function format_hello(a) {     var s = "";      if (a) {         s = s + "hello ";     }      s = s + "world";      return s; }  print(format_hello(1)); -- return "hello world" print(format_hello(0)); -- return "world"',
       );
       const parser = new Parser(lexer);
       const program = parser.parse();
