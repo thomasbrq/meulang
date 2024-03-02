@@ -70,6 +70,31 @@ function evaluate_binary_operations(
         result = lhs.value / rhs.value;
       }
       break;
+    case "==":
+      {
+        result = lhs.value == rhs.value;
+      }
+      break;
+    case ">":
+      {
+        result = lhs.value > rhs.value;
+      }
+      break;
+    case ">=":
+      {
+        result = lhs.value >= rhs.value;
+      }
+      break;
+    case "<":
+      {
+        result = lhs.value < rhs.value;
+      }
+      break;
+    case "<=":
+      {
+        result = lhs.value <= rhs.value;
+      }
+      break;
   }
 
   return {
