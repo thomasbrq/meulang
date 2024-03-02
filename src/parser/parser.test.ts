@@ -487,5 +487,13 @@ describe("Parser", () => {
       const parser = new Parser(lexer);
       const program = parser.parse();
     });
+
+    test("valid program test operators", () => {
+      const lexer = new Lexer(
+        "function empty() {     return; }  print(empty());",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
   });
 });
