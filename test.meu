@@ -1,14 +1,34 @@
-function format_hello(a) {
-    var s = "";
-
-    if (a) {
-        s = s + "hello ";
+function hello(n) {
+    if (n == 2) {
+        print("n == 2");
     }
 
-    s = s + "world";
+    if (n > 2) {
+        print("n > 2");
+    }
 
-    return s;
+    if (n >= 2) {
+        print("n >= 2");
+    }
+
+    if (n < 2) {
+        print("n < 2");
+    }
+
+    if (n <= 2) {
+        print("n <= 2");
+    }
+
+    if (n != 2) {
+        print("n != 2");
+    }
 }
 
-print(format_hello(1)); -- return "hello world"
-print(format_hello(0)); -- return "world"
+print("1:");
+hello(1);
+print();
+print("2:");
+hello(2);
+print();
+print("3:");
+hello(3);

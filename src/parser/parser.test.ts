@@ -490,5 +490,21 @@ describe("Parser", () => {
       const parser = new Parser(lexer);
       const program = parser.parse();
     });
+
+    test("valid program test operators", () => {
+      const lexer = new Lexer(
+        'function hello(n) {     if (n == 2) {         print("n == 2");     }      if (n > 2) {         print("n > 2");     }      if (n >= 2) {         print("n >= 2");     }      if (n < 2) {         print("n < 2");     }      if (n <= 2) {         print("n <= 2");     } }  hello(1); print(); hello(2); print(); hello(3);',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program test operators", () => {
+      const lexer = new Lexer(
+        'function hello(n) {     if (n == 2) {         print("n == 2");     }      if (n > 2) {         print("n > 2");     }      if (n >= 2) {         print("n >= 2");     }      if (n < 2) {         print("n < 2");     }      if (n <= 2) {         print("n <= 2");     }      if (n != 2) {         print("n != 2");     } }  print("1:"); hello(1); print(); print("2:"); hello(2); print(); print("3:"); hello(3);',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
   });
 });

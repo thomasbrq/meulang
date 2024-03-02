@@ -24,6 +24,13 @@ export enum TokenType {
   ASSIGN = "=",
   SEMI_COLON = ";",
   COMA = ",",
+
+  EQUAL = "==",
+  GT = ">",
+  GE = ">=",
+  LT = "<",
+  LE = "<=",
+  DT = "!=",
 }
 
 export type Token = {

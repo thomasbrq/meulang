@@ -46,7 +46,17 @@ export interface IfStatement extends Statement {
 
 export interface Expression extends Statement {}
 
-export type BinaryExpressionType = "+" | "-" | "/" | "*";
+export type BinaryExpressionType =
+  | "+"
+  | "-"
+  | "/"
+  | "*"
+  | "=="
+  | ">"
+  | ">="
+  | "<"
+  | "<="
+  | "!=";
 export interface BinaryExpression extends Expression {
   type: "BinaryExpression";
   left: Expression;
