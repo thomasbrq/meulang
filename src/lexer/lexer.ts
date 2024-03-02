@@ -187,7 +187,38 @@ export class Lexer {
         break;
       case "=":
         {
-          token = this.new_token(TokenType.ASSIGN, this.data.character);
+          const next = this.data.source[this.data.nextPosition];
+
+          if (next == "=") {
+            this.read_character();
+            token = this.new_token(TokenType.EQUAL, "==");
+          } else {
+            token = this.new_token(TokenType.ASSIGN, this.data.character);
+          }
+        }
+        break;
+      case ">":
+        {
+          const next = this.data.source[this.data.nextPosition];
+
+          if (next == "=") {
+            this.read_character();
+            token = this.new_token(TokenType.GE, ">=");
+          } else {
+            token = this.new_token(TokenType.GT, ">");
+          }
+        }
+        break;
+      case "<":
+        {
+          const next = this.data.source[this.data.nextPosition];
+
+          if (next == "=") {
+            this.read_character();
+            token = this.new_token(TokenType.LE, "<=");
+          } else {
+            token = this.new_token(TokenType.LT, "<");
+          }
         }
         break;
       case ",":
