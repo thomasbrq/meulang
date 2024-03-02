@@ -90,11 +90,19 @@ export class Parser {
   private parse_else_statement(): Statement {
     this.eat();
 
-    this.expect(TokenType.OPEN_BRACE, "{ expected.");
+    if (this.currentToken.type == TokenType.OPEN_BRACE) {
+      this.eat();
+    }
+
+    if (this.currentToken.type == TokenType.IF) {
+      return this.parse_if_statement();
+    }
 
     const block = this.parse_block_statement();
 
-    this.expect(TokenType.CLOSED_BRACE, "} expected.");
+    if (this.currentToken.type == TokenType.CLOSED_BRACE) {
+      this.eat();
+    }
 
     return block;
   }
