@@ -1,5 +1,9 @@
-function empty() {
-    return;
+function test(a) {
+    if (a == 1) {
+        print("a is 1");
+    } else {
+        print("a is not 1");
+    }
 }
 
-print(empty()); -- return null
+test(1);
