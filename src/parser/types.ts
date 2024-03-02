@@ -55,7 +55,8 @@ export type BinaryExpressionType =
   | ">"
   | ">="
   | "<"
-  | "<=";
+  | "<="
+  | "!=";
 export interface BinaryExpression extends Expression {
   type: "BinaryExpression";
   left: Expression;

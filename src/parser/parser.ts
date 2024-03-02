@@ -207,7 +207,8 @@ export class Parser {
       this.currentToken.type == TokenType.GT ||
       this.currentToken.type == TokenType.GE ||
       this.currentToken.type == TokenType.LT ||
-      this.currentToken.type == TokenType.LE
+      this.currentToken.type == TokenType.LE ||
+      this.currentToken.type == TokenType.DT
     ) {
       let op = this.currentToken;
 

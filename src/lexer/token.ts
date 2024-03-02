@@ -30,6 +30,7 @@ export enum TokenType {
   GE = ">=",
   LT = "<",
   LE = "<=",
+  DT = "!=",
 }
 
 export type Token = {

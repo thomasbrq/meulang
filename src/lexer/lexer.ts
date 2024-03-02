@@ -221,6 +221,18 @@ export class Lexer {
           }
         }
         break;
+      case "!":
+        {
+          const next = this.data.source[this.data.nextPosition];
+
+          if (next == "=") {
+            this.read_character();
+            token = this.new_token(TokenType.DT, "!=");
+          } else {
+            token = this.new_token(TokenType.ILLEGAL, this.data.character);
+          }
+        }
+        break;
       case ",":
         {
           token = this.new_token(TokenType.COMA, this.data.character);

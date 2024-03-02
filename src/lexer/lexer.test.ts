@@ -195,7 +195,7 @@ describe("Lexer class", () => {
     });
 
     test("test operators", () => {
-      const lexer = new LexerTest("= == > >= < <=");
+      const lexer = new LexerTest("= == > >= < <= !=");
       const expecteds: TestTokenType[] = [
         { expectedType: TokenType.ASSIGN, expectedValue: "=" },
         { expectedType: TokenType.EQUAL, expectedValue: "==" },
@@ -203,6 +203,7 @@ describe("Lexer class", () => {
         { expectedType: TokenType.GE, expectedValue: ">=" },
         { expectedType: TokenType.LT, expectedValue: "<" },
         { expectedType: TokenType.LE, expectedValue: "<=" },
+        { expectedType: TokenType.DT, expectedValue: "!=" },
       ];
       testTokens(lexer, expecteds);
     });
