@@ -40,6 +40,7 @@ export interface IfStatement extends Statement {
   type: "IfStatement";
   test: Expression;
   consequent: BlockStatement;
+  alternate: Statement | null;
 }
 
 export interface Expression extends Statement {}

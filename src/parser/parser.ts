@@ -87,6 +87,18 @@ export class Parser {
     }
   }
 
+  private parse_else_statement(): Statement {
+    this.eat();
+
+    this.expect(TokenType.OPEN_BRACE, "{ expected.");
+
+    const block = this.parse_block_statement();
+
+    this.expect(TokenType.CLOSED_BRACE, "} expected.");
+
+    return block;
+  }
+
   private parse_if_statement(): Statement {
     this.eat();
     this.expect(TokenType.OPEN_PAREN, "( expected");
@@ -100,9 +112,15 @@ export class Parser {
       type: "IfStatement",
       test: test,
       consequent: this.parse_block_statement(),
+      alternate: null,
     } as IfStatement;
 
     this.expect(TokenType.CLOSED_BRACE, "} expected.");
+
+    if (this.currentToken.type == TokenType.ELSE) {
+      const alternate = this.parse_else_statement();
+      if_statement.alternate = alternate;
+    }
 
     return if_statement;
   }

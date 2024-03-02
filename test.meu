@@ -6,4 +6,4 @@ function test(a) {
     }
 }
 
-test(1);
+test(2);
