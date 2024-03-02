@@ -38,6 +38,12 @@ export interface BlockStatement extends Statement {
   body: Statement[];
 }
 
+export interface IfStatement extends Statement {
+  type: "IfStatement";
+  test: Expression;
+  consequent: BlockStatement;
+}
+
 export interface Expression extends Statement {}
 
 export type BinaryExpressionType = "+" | "-" | "/" | "*";

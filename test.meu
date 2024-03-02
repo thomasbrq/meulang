@@ -1,8 +1,5 @@
-print("Hello world!");
-print("Hello" + " " + "world!");
-
-const a = "Hello world!";
-const b = "Hello " + "world!";
-print(a);
-print(b);
-print("result:", a+b);
+if (1) {
+    print("hello");
+    const a = 1;
+    var b = 2;
+}
