@@ -110,6 +110,17 @@ export class Parser {
   private parse_return_statement(): Statement {
     this.eat();
 
+    if (this.currentToken.type == TokenType.SEMI_COLON) {
+      this.eat();
+      return {
+        type: "ReturnStatement",
+        argument: {
+          type: "Literal",
+          value: null,
+        } as Literal,
+      } as ReturnStatement;
+    }
+
     const expression = this.parse_expression();
 
     const statement = {
