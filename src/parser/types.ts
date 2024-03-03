@@ -43,6 +43,12 @@ export interface IfStatement extends Statement {
   alternate: Statement | null;
 }
 
+export interface WhileStatement extends Statement {
+  type: "WhileStatement";
+  test: Expression;
+  body: BlockStatement;
+}
+
 export interface Expression extends Statement {}
 
 export type BinaryExpressionType =

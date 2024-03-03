@@ -13,6 +13,7 @@ import type {
   ReturnStatement,
   Statement,
   VariableDeclaration,
+  WhileStatement,
 } from "../parser/types";
 import { Environment } from "./environment";
 import type {
@@ -297,6 +298,20 @@ function evaluate_block_statement(
   return value;
 }
 
+function evaluate_while_statement(
+  statement: WhileStatement,
+  env: Environment,
+): Value {
+  let expr = evaluate(statement.test, env);
+
+  while (expr && expr.value) {
+    evaluate(statement.body, env);
+    expr = evaluate(statement.test, env);
+  }
+
+  return expr;
+}
+
 export function evaluate(node: Statement, env: Environment): Value {
   switch (node.type) {
     case "Program": {
@@ -325,6 +340,9 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "IfStatement": {
       return evaluate_if_statement(node as IfStatement, env);
+    }
+    case "WhileStatement": {
+      return evaluate_while_statement(node as WhileStatement, env);
     }
     case "BlockStatement": {
       return evaluate_block_statement(node as BlockStatement, env);
