@@ -1,3 +1,4 @@
+import { shrink } from "bun";
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
@@ -15,6 +16,7 @@ import type {
   ReturnStatement,
   Statement,
   VariableDeclaration,
+  WhileStatement,
 } from "./types";
 
 export class Parser {
@@ -81,10 +83,34 @@ export class Parser {
       case TokenType.IF: {
         return this.parse_if_statement();
       }
+      case TokenType.WHILE: {
+        return this.parse_while_statement();
+      }
       default: {
         return this.parse_expression();
       }
     }
+  }
+
+  private parse_while_statement(): Statement {
+    this.eat();
+    this.expect(TokenType.OPEN_PAREN, "( expected");
+
+    const test = this.parse_expression();
+
+    this.expect(TokenType.CLOSED_PAREN, ") expected");
+
+    this.expect(TokenType.OPEN_BRACE, "{ expected.");
+
+    const while_statement = {
+      type: "WhileStatement",
+      test: test,
+      body: this.parse_block_statement(),
+    } as WhileStatement;
+
+    this.expect(TokenType.CLOSED_BRACE, "} expected.");
+
+    return while_statement;
   }
 
   private parse_else_statement(): Statement {

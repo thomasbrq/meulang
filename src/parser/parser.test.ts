@@ -511,5 +511,13 @@ describe("Parser", () => {
       const parser = new Parser(lexer);
       const program = parser.parse();
     });
+
+    test("valid program if else if else 2", () => {
+      const lexer = new Lexer(
+        "var a = 1; while (a < 10) {     print(a);     a = a + 1; }",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
   });
 });
