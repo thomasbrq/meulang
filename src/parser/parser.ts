@@ -1,4 +1,3 @@
-import { shrink } from "bun";
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
