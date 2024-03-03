@@ -512,7 +512,7 @@ describe("Parser", () => {
       const program = parser.parse();
     });
 
-    test("valid program if else if else 2", () => {
+    test("valid program while", () => {
       const lexer = new Lexer(
         "var a = 1; while (a < 10) {     print(a);     a = a + 1; }",
       );
