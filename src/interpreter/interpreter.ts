@@ -262,6 +262,8 @@ function evaluate_if_statement(statement: IfStatement, env: Environment) {
 
   if (expr && expr.value) {
     return evaluate(statement.consequent, env);
+  } else {
+    if (statement.alternate) return evaluate(statement.alternate, env);
   }
 
   return expr;

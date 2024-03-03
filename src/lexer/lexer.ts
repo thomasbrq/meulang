@@ -1,4 +1,3 @@
-import { isToken } from "typescript";
 import { TokenType, type Token, keywords } from "./token";
 
 export type LexerType = {

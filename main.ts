@@ -3,7 +3,6 @@ import { evaluate } from "./src/interpreter/interpreter";
 import type {
   NativeFunctionValue,
   NullValue,
-  NumberValue,
   Value,
 } from "./src/interpreter/types";
 import { Lexer } from "./src/lexer/lexer";
@@ -16,7 +15,7 @@ const print = {
     console.log(...a);
     return {
       type: "null",
-      value: "null",
+      value: null,
     } as NullValue;
   },
 } as NativeFunctionValue;

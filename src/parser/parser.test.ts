@@ -488,9 +488,25 @@ describe("Parser", () => {
       const program = parser.parse();
     });
 
-    test("valid program test operators", () => {
+    test("valid program test empty return", () => {
       const lexer = new Lexer(
         "function empty() {     return; }  print(empty());",
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program if else if else", () => {
+      const lexer = new Lexer(
+        'function test(a) {     if (a == 1) {         print("a is 1");     } else if (a == 2) {         print("a is 2");     } else if (a == 3) {         print("a is 3");     } else {         print("nonono");     }      var a = 1;      print(a);      return "hello"; }  print(test(4));',
+      );
+      const parser = new Parser(lexer);
+      const program = parser.parse();
+    });
+
+    test("valid program if else if else 2", () => {
+      const lexer = new Lexer(
+        'function test(a) {     if (a == 1) {         print("a is 1");     } else if (a == 2) {         print("a is 2");     } else if (a == 3) {         print("a is 3");     } else {         print("nonono");     }      var a = 1;      print(a);      return "hello"; }  print(test(4));',
       );
       const parser = new Parser(lexer);
       const program = parser.parse();

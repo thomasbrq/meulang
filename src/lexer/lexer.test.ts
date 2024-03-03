@@ -164,12 +164,14 @@ describe("Lexer class", () => {
     });
 
     test("keyword tokens", () => {
-      const lexer = new LexerTest("const var function return");
+      const lexer = new LexerTest("const var function return if else");
       const expecteds: TestTokenType[] = [
         { expectedType: TokenType.CONST, expectedValue: "const" },
         { expectedType: TokenType.VAR, expectedValue: "var" },
         { expectedType: TokenType.FUNCTION, expectedValue: "function" },
         { expectedType: TokenType.RETURN, expectedValue: "return" },
+        { expectedType: TokenType.IF, expectedValue: "if" },
+        { expectedType: TokenType.ELSE, expectedValue: "else" },
         { expectedType: TokenType.EOF, expectedValue: "EOF" },
       ];
       testTokens(lexer, expecteds);

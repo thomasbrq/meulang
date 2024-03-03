@@ -1,5 +1,19 @@
-function empty() {
-    return;
+function test(a) {
+    if (a == 1) {
+        print("a is 1");
+    } else if (a == 2) {
+        print("a is 2");
+    } else if (a == 3) {
+        print("a is 3");
+    } else {
+        print("nonono");
+    }
+
+    var a = 1;
+
+    print(a);
+
+    return "hello";
 }
 
-print(empty()); -- return null
+print(test(4));
