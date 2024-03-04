@@ -5,6 +5,7 @@ import type {
   BlockStatement,
   CallExpression,
   CallStatement,
+  ExpressionStatement,
   FunctionDeclaration,
   Identifier,
   IfStatement,
@@ -312,6 +313,13 @@ function evaluate_while_statement(
   return expr;
 }
 
+function evaluate_expression_statement(
+  statement: ExpressionStatement,
+  env: Environment,
+): Value {
+  return evaluate(statement.expression, env);
+}
+
 export function evaluate(node: Statement, env: Environment): Value {
   switch (node.type) {
     case "Program": {
@@ -346,6 +354,9 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "BlockStatement": {
       return evaluate_block_statement(node as BlockStatement, env);
+    }
+    case "ExpressionStatement": {
+      return evaluate_expression_statement(node as ExpressionStatement, env);
     }
     case "Literal": {
       const n = node as Literal;

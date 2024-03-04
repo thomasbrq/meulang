@@ -7,6 +7,7 @@ import type {
   CallExpression,
   CallStatement,
   Expression,
+  ExpressionStatement,
   FunctionDeclaration,
   Identifier,
   IfStatement,
@@ -231,6 +232,20 @@ export class Parser {
       return this.parse_func_call();
     }
 
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.ASSIGN
+    ) {
+      const statement = {
+        type: "ExpressionStatement",
+        expression: this.parse_expression(),
+      } as ExpressionStatement;
+
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return statement;
+    }
+
     return this.parse_expression();
   }
 
@@ -251,8 +266,6 @@ export class Parser {
         right,
         operator: "=",
       } as AssignmentExpression;
-
-      this.expect(TokenType.SEMI_COLON, "; expected.");
 
       return expr;
     }
@@ -457,7 +470,7 @@ export class Parser {
       }
       case TokenType.OPEN_PAREN: {
         this.eat();
-        const value = this.parse_addsub_expression();
+        const value = this.parse_expression();
         this.expect(TokenType.CLOSED_PAREN, "No closed parenthesis found.");
         return value;
       }

@@ -49,6 +49,11 @@ export interface WhileStatement extends Statement {
   body: BlockStatement;
 }
 
+export interface ExpressionStatement extends Statement {
+  type: "ExpressionStatement";
+  expression: Expression;
+}
+
 export interface Expression extends Statement {}
 
 export type BinaryExpressionType =
