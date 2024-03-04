@@ -8,6 +8,7 @@ import type {
   CallExpression,
   CallStatement,
   Expression,
+  ExpressionStatement,
   FunctionDeclaration,
   Identifier,
   Literal,
@@ -168,8 +169,10 @@ describe("Parser", () => {
       const declaration = program.body[0] as VariableDeclaration;
       expect(declaration.name).toBe("hello");
 
-      expect(program.body[1].type).toBe("AssignmentExpression");
-      const b1 = program.body[1] as AssignmentExpression;
+      expect(program.body[1].type).toBe("ExpressionStatement");
+      const x = program.body[1] as ExpressionStatement;
+
+      const b1 = x.expression as AssignmentExpression;
 
       expect(b1.operator).toBe("=");
 
@@ -206,8 +209,10 @@ describe("Parser", () => {
       const t = declaration.value as Literal;
       expect(t.value).toBe(0);
 
-      expect(program.body[1].type).toBe("AssignmentExpression");
-      const b1 = program.body[1] as AssignmentExpression;
+      expect(program.body[1].type).toBe("ExpressionStatement");
+      const x = program.body[1] as ExpressionStatement;
+
+      const b1 = x.expression as AssignmentExpression;
 
       expect(b1.operator).toBe("=");
 
