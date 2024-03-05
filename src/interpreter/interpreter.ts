@@ -1,4 +1,5 @@
 import type {
+  ArrayExpression,
   AssignmentExpression,
   BinaryExpression,
   BinaryExpressionType,
@@ -10,6 +11,7 @@ import type {
   Identifier,
   IfStatement,
   Literal,
+  MemberExpression,
   Program,
   ReturnStatement,
   Statement,
@@ -18,6 +20,7 @@ import type {
 } from "../parser/types";
 import { Environment } from "./environment";
 import type {
+  ArrayValue,
   BlockValue,
   FunctionValue,
   NativeFunctionValue,
@@ -157,6 +160,26 @@ function evaluate_assignment_expression(
   node: AssignmentExpression,
   env: Environment,
 ): Value {
+  if (node.left.type == "MemberExpression") {
+    const value = evaluate(node.right, env);
+    const offset = node.left.property.value;
+    if (offset == null) {
+      console.error("array offset cannot be null.");
+      process.exit(1);
+    }
+
+    const evaluated_value = env.modify_array(
+      node.left.object.name,
+      offset,
+      value,
+    );
+
+    return {
+      type: typeof evaluated_value.value,
+      value: evaluated_value.value,
+    } as Value;
+  }
+
   const name = node.left.name;
   const value = evaluate(node.right, env);
 
@@ -320,6 +343,49 @@ function evaluate_expression_statement(
   return evaluate(statement.expression, env);
 }
 
+function evaluate_array_expression(
+  expression: ArrayExpression,
+  env: Environment,
+): Value {
+  const evaluations = [];
+
+  for (const element of expression.elements) {
+    const evaluated = evaluate(element, env);
+    evaluations.push(evaluated);
+  }
+
+  return {
+    type: "array",
+    value: evaluations,
+  } as ArrayValue;
+}
+
+function evaluate_member_expression(
+  expression: MemberExpression,
+  env: Environment,
+): Value {
+  const null_value = {
+    type: "null",
+    value: null,
+  } as NullValue;
+
+  const variable = evaluate(expression.object, env);
+  if (variable.value == null || expression.property.value == null) {
+    return null_value;
+  }
+
+  // TODO: typescript hack.
+  const value = (variable.value as any)[expression.property.value];
+  if (!value) {
+    return null_value;
+  }
+
+  return {
+    type: typeof value,
+    value: value.value,
+  } as Value;
+}
+
 export function evaluate(node: Statement, env: Environment): Value {
   switch (node.type) {
     case "Program": {
@@ -357,6 +423,12 @@ export function evaluate(node: Statement, env: Environment): Value {
     }
     case "ExpressionStatement": {
       return evaluate_expression_statement(node as ExpressionStatement, env);
+    }
+    case "ArrayExpression": {
+      return evaluate_array_expression(node as ArrayExpression, env);
+    }
+    case "MemberExpression": {
+      return evaluate_member_expression(node as MemberExpression, env);
     }
     case "Literal": {
       const n = node as Literal;

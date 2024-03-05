@@ -86,7 +86,7 @@ export interface Identifier extends Expression {
 
 export interface AssignmentExpression extends Expression {
   type: "AssignmentExpression";
-  left: Identifier;
+  left: Identifier | MemberExpression;
   right: Expression;
   operator: string;
 }
@@ -95,4 +95,15 @@ export interface CallExpression extends Expression {
   type: "CallExpression";
   callee: Identifier;
   arguments: Expression[];
+}
+
+export interface ArrayExpression extends Expression {
+  type: "ArrayExpression";
+  elements: Literal[];
+}
+
+export interface MemberExpression extends Expression {
+  type: "MemberExpression";
+  object: Identifier;
+  property: Literal;
 }

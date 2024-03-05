@@ -8,11 +8,12 @@ export type ValueType =
   | "native-fn"
   | "function"
   | "return"
-  | "block";
+  | "block"
+  | "array";
 
 export interface Value {
   type: ValueType;
-  value: number | string | null;
+  value: number | string | Value[] | null;
 }
 
 export interface NullValue extends Value {
@@ -33,6 +34,11 @@ export interface StringValue extends Value {
 export interface ReturnValue extends Value {
   type: "return";
   value: number;
+}
+
+export interface ArrayValue extends Value {
+  type: "array";
+  value: Value[];
 }
 
 export type FunctionCall = (args: Value[], env: Environment) => Value;

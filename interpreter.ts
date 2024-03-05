@@ -80,6 +80,8 @@ function get_filepath_from_args(): string | undefined {
 
   const program = parser.parse();
 
+  // console.log(program, true);
+
   const env = new Environment();
 
   env.declare("print", print, true);

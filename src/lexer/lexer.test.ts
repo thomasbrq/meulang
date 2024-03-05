@@ -145,7 +145,7 @@ describe("Lexer class", () => {
     });
 
     test("basic tokens", () => {
-      const lexer = new LexerTest("()+-*/1;={}");
+      const lexer = new LexerTest("()+-*/1;={}[]");
       const expecteds: TestTokenType[] = [
         { expectedType: TokenType.OPEN_PAREN, expectedValue: "(" },
         { expectedType: TokenType.CLOSED_PAREN, expectedValue: ")" },
@@ -158,6 +158,8 @@ describe("Lexer class", () => {
         { expectedType: TokenType.ASSIGN, expectedValue: "=" },
         { expectedType: TokenType.OPEN_BRACE, expectedValue: "{" },
         { expectedType: TokenType.CLOSED_BRACE, expectedValue: "}" },
+        { expectedType: TokenType.OPEN_BRACKET, expectedValue: "[" },
+        { expectedType: TokenType.CLOSED_BRACKET, expectedValue: "]" },
         { expectedType: TokenType.EOF, expectedValue: "EOF" },
       ];
       testTokens(lexer, expecteds);
