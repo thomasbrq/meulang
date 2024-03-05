@@ -1,6 +1,5 @@
 # meulang
 
-
 > [!NOTE]
 > Work in progress
 
@@ -10,10 +9,17 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To run the interpreter:
 
 ```bash
-bun run main.ts
+bun run interpreter.ts # the default file is main.meu
+bun run interpreter.ts --file main.meu
+```
+
+To run the REPL:
+
+```bash
+bun run repl.ts
 ```
 
 To run tests:
