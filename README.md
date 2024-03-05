@@ -9,7 +9,7 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To run the interpreter:
 
 ```bash
 bun run interpreter.ts # the default file is main.meu
