@@ -16,6 +16,12 @@ bun run interpreter.ts # the default file is main.meu
 bun run interpreter.ts --file main.meu
 ```
 
+To run the REPL:
+
+```bash
+bun run repl.ts
+```
+
 To run tests:
 
 ```bash
