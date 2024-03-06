@@ -95,8 +95,7 @@ export class Parser {
   }
 
   private parse_declaration(): VariableDeclaration {
-    const current_token = this.currentToken;
-    const constant = current_token.type == TokenType.CONST;
+    const constant = this.currentToken.type == TokenType.CONST;
 
     this.eat();
 
@@ -127,7 +126,7 @@ export class Parser {
       type: "VariableDeclaration",
       name: identifier.value,
       value: this.parse_expression(),
-      constant,
+      constant: constant,
     } as VariableDeclaration;
 
     this.expect(TokenType.SEMI_COLON, "; expected.");
@@ -188,11 +187,11 @@ export class Parser {
       } as ReturnStatement;
     }
 
-    const expression = this.parse_expression();
+    const argument = this.parse_expression();
 
     const statement = {
       type: "ReturnStatement",
-      argument: expression,
+      argument: argument,
     } as ReturnStatement;
 
     this.expect(TokenType.SEMI_COLON, "; expected.");
@@ -233,7 +232,6 @@ export class Parser {
     const test = this.parse_expression();
 
     this.expect(TokenType.CLOSED_PAREN, ") expected");
-
     this.expect(TokenType.OPEN_BRACE, "{ expected.");
 
     const while_statement = {
@@ -258,14 +256,12 @@ export class Parser {
       this.eat();
       const right = this.parse_test_operators();
 
-      const expr = {
+      return {
         type: "AssignmentExpression",
-        left,
-        right,
+        left: left,
+        right: right,
         operator: "=",
       } as AssignmentExpression;
-
-      return expr;
     }
 
     return left;
@@ -289,8 +285,8 @@ export class Parser {
       const right = this.parse_addsub_expression();
       left = {
         type: "BinaryExpression",
-        left,
-        right,
+        left: left,
+        right: right,
         operator: op.value,
       } as BinaryExpression;
     }
@@ -309,8 +305,8 @@ export class Parser {
       const right = this.parse_multdiv_expression();
       left = {
         type: "BinaryExpression",
-        left,
-        right,
+        left: left,
+        right: right,
         operator: op.value,
       } as BinaryExpression;
     }
@@ -329,8 +325,8 @@ export class Parser {
       const right = this.parse_func_expression();
       left = {
         type: "BinaryExpression",
-        left,
-        right,
+        left: left,
+        right: right,
         operator: op.value,
       } as BinaryExpression;
     }
@@ -343,11 +339,13 @@ export class Parser {
       this.currentToken.type == TokenType.IDENTIFIER &&
       this.nextToken.type == TokenType.OPEN_PAREN
     ) {
-      const identifier = this.parse_primary_expression();
-      this.eat(); // eat '(''
+      const callee = this.parse_primary_expression();
+
+      this.eat();
+
       return {
         type: "CallExpression",
-        callee: identifier,
+        callee: callee,
         arguments: this.parse_args(),
       } as CallExpression;
     }
@@ -360,16 +358,20 @@ export class Parser {
       this.currentToken.type == TokenType.IDENTIFIER &&
       this.nextToken.type == TokenType.OPEN_BRACKET
     ) {
-      const identifier = this.parse_primary_expression();
+      const object = this.parse_primary_expression();
+
       this.eat();
-      const offset = this.parse_expression();
+
+      const property = this.parse_expression();
+
       this.expect(TokenType.CLOSED_BRACKET, "] expected.");
       return {
         type: "MemberExpression",
-        object: identifier,
-        property: offset,
+        object: object,
+        property: property,
       } as MemberExpression;
     }
+
     return this.parse_primary_expression();
   }
 
@@ -400,19 +402,19 @@ export class Parser {
 
     this.expect(TokenType.OPEN_PAREN, "( expected.");
 
-    const args = this.parse_args();
+    const parameters = this.parse_args();
 
     this.expect(TokenType.OPEN_BRACE, "{ expected.");
 
-    const body_statement = this.parse_block_statement();
+    const body = this.parse_block_statement();
 
     this.expect(TokenType.CLOSED_BRACE, "} expected.");
 
     return {
       type: "FunctionDeclaration",
       identifier: identifier,
-      parameters: args,
-      body: body_statement,
+      parameters: parameters,
+      body: body,
     } as FunctionDeclaration;
   }
 
@@ -504,14 +506,20 @@ export class Parser {
       }
       case TokenType.OPEN_PAREN: {
         this.eat();
+
         const value = this.parse_expression();
+
         this.expect(TokenType.CLOSED_PAREN, "No closed parenthesis found.");
+
         return value;
       }
       case TokenType.OPEN_BRACKET: {
         this.eat();
+
         const elements = this.parse_array();
+
         this.expect(TokenType.CLOSED_BRACKET, "] expected.");
+
         return {
           type: "ArrayExpression",
           elements: elements,
