@@ -94,71 +94,84 @@ export class Parser {
     }
   }
 
-  private parse_while_statement(): Statement {
+  private parse_declaration(): VariableDeclaration {
+    const current_token = this.currentToken;
+    const constant = current_token.type == TokenType.CONST;
+
     this.eat();
-    this.expect(TokenType.OPEN_PAREN, "( expected");
 
-    const test = this.parse_expression();
+    const identifier: Token = this.expect(
+      TokenType.IDENTIFIER,
+      "Identifier expected.",
+    );
 
-    this.expect(TokenType.CLOSED_PAREN, ") expected");
+    if (this.currentToken.type == TokenType.SEMI_COLON) {
+      if (constant) {
+        console.error("You must assign a value to a const declaration.");
+        process.exit(1);
+      }
 
-    this.expect(TokenType.OPEN_BRACE, "{ expected.");
+      this.eat();
 
-    const while_statement = {
-      type: "WhileStatement",
-      test: test,
-      body: this.parse_block_statement(),
-    } as WhileStatement;
+      // TODO: assign 'null' by default.
+      return {
+        type: "VariableDeclaration",
+        name: identifier.value,
+        constant: false,
+      } as VariableDeclaration;
+    }
 
-    this.expect(TokenType.CLOSED_BRACE, "} expected.");
+    this.expect(TokenType.ASSIGN, "'=' expected.");
 
-    return while_statement;
+    const declaration = {
+      type: "VariableDeclaration",
+      name: identifier.value,
+      value: this.parse_expression(),
+      constant,
+    } as VariableDeclaration;
+
+    this.expect(TokenType.SEMI_COLON, "; expected.");
+
+    return declaration;
   }
 
-  private parse_else_statement(): Statement {
-    this.eat();
-
-    if (this.currentToken.type == TokenType.OPEN_BRACE) {
-      this.eat();
+  private parse_identifier_statement() {
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.OPEN_PAREN
+    ) {
+      return this.parse_func_call();
     }
 
-    if (this.currentToken.type == TokenType.IF) {
-      return this.parse_if_statement();
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.ASSIGN
+    ) {
+      const statement = {
+        type: "ExpressionStatement",
+        expression: this.parse_expression(),
+      } as ExpressionStatement;
+
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return statement;
     }
 
-    const block = this.parse_block_statement();
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.OPEN_BRACKET
+    ) {
+      const statement = {
+        type: "ExpressionStatement",
+        expression: this.parse_expression(),
+      } as ExpressionStatement;
 
-    if (this.currentToken.type == TokenType.CLOSED_BRACE) {
-      this.eat();
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return statement;
     }
 
-    return block;
-  }
-
-  private parse_if_statement(): Statement {
-    this.eat();
-    this.expect(TokenType.OPEN_PAREN, "( expected");
-
-    const test = this.parse_expression();
-
-    this.expect(TokenType.CLOSED_PAREN, ") expected.");
-    this.expect(TokenType.OPEN_BRACE, "{ expected");
-
-    const if_statement = {
-      type: "IfStatement",
-      test: test,
-      consequent: this.parse_block_statement(),
-      alternate: null,
-    } as IfStatement;
-
-    this.expect(TokenType.CLOSED_BRACE, "} expected.");
-
-    if (this.currentToken.type == TokenType.ELSE) {
-      const alternate = this.parse_else_statement();
-      if_statement.alternate = alternate;
-    }
-
-    return if_statement;
+    return this.parse_expression();
   }
 
   private parse_return_statement(): Statement {
@@ -187,79 +200,51 @@ export class Parser {
     return statement;
   }
 
-  private parse_declare_function(): Statement {
+  private parse_if_statement(): Statement {
     this.eat();
+    this.expect(TokenType.OPEN_PAREN, "( expected");
 
-    const identifier = this.parse_primary_expression();
+    const test = this.parse_expression();
 
-    this.expect(TokenType.OPEN_PAREN, "( expected.");
+    this.expect(TokenType.CLOSED_PAREN, ") expected.");
+    this.expect(TokenType.OPEN_BRACE, "{ expected");
 
-    const args = this.parse_args();
-
-    this.expect(TokenType.OPEN_BRACE, "{ expected.");
-
-    const body_statement = this.parse_block_statement();
+    const if_statement = {
+      type: "IfStatement",
+      test: test,
+      consequent: this.parse_block_statement(),
+      alternate: null,
+    } as IfStatement;
 
     this.expect(TokenType.CLOSED_BRACE, "} expected.");
 
-    return {
-      type: "FunctionDeclaration",
-      identifier: identifier,
-      parameters: args,
-      body: body_statement,
-    } as FunctionDeclaration;
+    if (this.currentToken.type == TokenType.ELSE) {
+      const alternate = this.parse_else_statement();
+      if_statement.alternate = alternate;
+    }
+
+    return if_statement;
   }
 
-  private parse_block_statement(): Statement {
-    const body: Statement[] = [];
+  private parse_while_statement(): Statement {
+    this.eat();
+    this.expect(TokenType.OPEN_PAREN, "( expected");
 
-    while (
-      this.currentToken.type != TokenType.CLOSED_BRACE &&
-      this.currentToken.type != TokenType.EOF
-    ) {
-      body.push(this.parse_statement());
-    }
+    const test = this.parse_expression();
 
-    return {
-      type: "BlockStatement",
-      body: body,
-    } as BlockStatement;
-  }
+    this.expect(TokenType.CLOSED_PAREN, ") expected");
 
-  private parse_identifier_statement() {
-    if (
-      this.currentToken.type == TokenType.IDENTIFIER &&
-      this.nextToken.type == TokenType.OPEN_PAREN
-    ) {
-      return this.parse_func_call();
-    }
+    this.expect(TokenType.OPEN_BRACE, "{ expected.");
 
-    if (
-      this.currentToken.type == TokenType.IDENTIFIER &&
-      this.nextToken.type == TokenType.ASSIGN
-    ) {
-      const statement = {
-        type: "ExpressionStatement",
-        expression: this.parse_expression(),
-      } as ExpressionStatement;
+    const while_statement = {
+      type: "WhileStatement",
+      test: test,
+      body: this.parse_block_statement(),
+    } as WhileStatement;
 
-      this.expect(TokenType.SEMI_COLON, "; expected.");
+    this.expect(TokenType.CLOSED_BRACE, "} expected.");
 
-      return statement;
-    }
-
-    if (this.currentToken.type == TokenType.IDENTIFIER && this.nextToken.type == TokenType.OPEN_BRACKET) {
-      const statement = {
-        type: "ExpressionStatement",
-        expression: this.parse_expression()
-      } as ExpressionStatement;
-      
-      this.expect(TokenType.SEMI_COLON, "; expected.");
-
-      return statement;
-    }
-
-    return this.parse_expression();
+    return while_statement;
   }
 
   private parse_expression(): Expression {
@@ -313,115 +298,6 @@ export class Parser {
     return left;
   }
 
-  private parse_declaration(): VariableDeclaration {
-    const current_token = this.currentToken;
-    const constant = current_token.type == TokenType.CONST;
-
-    this.eat();
-
-    const identifier: Token = this.expect(
-      TokenType.IDENTIFIER,
-      "Identifier expected.",
-    );
-
-    if (this.currentToken.type == TokenType.SEMI_COLON) {
-      if (constant) {
-        console.error("You must assign a value to a const declaration.");
-        process.exit(1);
-      }
-
-      this.eat();
-
-      // TODO: assign 'null' by default.
-      return {
-        type: "VariableDeclaration",
-        name: identifier.value,
-        constant: false,
-      } as VariableDeclaration;
-    }
-
-    this.expect(TokenType.ASSIGN, "'=' expected.");
-
-    const declaration = {
-      type: "VariableDeclaration",
-      name: identifier.value,
-      value: this.parse_expression(),
-      constant,
-    } as VariableDeclaration;
-
-    this.expect(TokenType.SEMI_COLON, "; expected.");
-
-    return declaration;
-  }
-
-  private parse_args(): Expression[] {
-    const args: Expression[] = [];
-
-    while (this.currentToken.type != TokenType.CLOSED_PAREN) {
-      if (this.currentToken.type == TokenType.COMA) {
-        this.eat();
-      }
-      const expression = this.parse_expression();
-      args.push(expression);
-    }
-
-    if (this.currentToken.type == TokenType.CLOSED_PAREN) {
-      this.eat();
-    }
-
-    return args;
-  }
-
-  private parse_func_expression(): Expression {
-    if (
-      this.currentToken.type == TokenType.IDENTIFIER &&
-      this.nextToken.type == TokenType.OPEN_PAREN
-    ) {
-      const identifier = this.parse_primary_expression();
-      this.eat(); // eat '(''
-      return {
-        type: "CallExpression",
-        callee: identifier,
-        arguments: this.parse_args(),
-      } as CallExpression;
-    }
-
-    return this.parse_member_expression();
-  }
-
-  private parse_func_call(): Statement {
-    if (
-      this.currentToken.type == TokenType.IDENTIFIER &&
-      this.nextToken.type == TokenType.OPEN_PAREN
-    ) {
-      const statement = {
-        type: "CallStatement",
-        expression: this.parse_func_expression(),
-      } as CallStatement;
-
-      this.expect(TokenType.SEMI_COLON, "; expected.");
-
-      return statement;
-    }
-
-    return this.parse_member_expression();
-  }
-
-  private parse_member_expression(): Expression {
-    if (this.currentToken.type == TokenType.IDENTIFIER && this.nextToken.type == TokenType.OPEN_BRACKET) {
-      const identifier = this.parse_primary_expression();
-      this.eat();
-      const offset = this.parse_expression();
-      this.expect(TokenType.CLOSED_BRACKET, "] expected.");
-      return {
-        type: "MemberExpression",
-        object: identifier,
-        property: offset,
-      } as MemberExpression;
-    }
-    return this.parse_primary_expression();
-  }
-
   private parse_addsub_expression(): Expression {
     let left = this.parse_multdiv_expression();
 
@@ -460,6 +336,136 @@ export class Parser {
     }
 
     return left;
+  }
+
+  private parse_func_expression(): Expression {
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.OPEN_PAREN
+    ) {
+      const identifier = this.parse_primary_expression();
+      this.eat(); // eat '(''
+      return {
+        type: "CallExpression",
+        callee: identifier,
+        arguments: this.parse_args(),
+      } as CallExpression;
+    }
+
+    return this.parse_member_expression();
+  }
+
+  private parse_member_expression(): Expression {
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.OPEN_BRACKET
+    ) {
+      const identifier = this.parse_primary_expression();
+      this.eat();
+      const offset = this.parse_expression();
+      this.expect(TokenType.CLOSED_BRACKET, "] expected.");
+      return {
+        type: "MemberExpression",
+        object: identifier,
+        property: offset,
+      } as MemberExpression;
+    }
+    return this.parse_primary_expression();
+  }
+
+  private parse_else_statement(): Statement {
+    this.eat();
+
+    if (this.currentToken.type == TokenType.OPEN_BRACE) {
+      this.eat();
+    }
+
+    if (this.currentToken.type == TokenType.IF) {
+      return this.parse_if_statement();
+    }
+
+    const block = this.parse_block_statement();
+
+    if (this.currentToken.type == TokenType.CLOSED_BRACE) {
+      this.eat();
+    }
+
+    return block;
+  }
+
+  private parse_declare_function(): Statement {
+    this.eat();
+
+    const identifier = this.parse_primary_expression();
+
+    this.expect(TokenType.OPEN_PAREN, "( expected.");
+
+    const args = this.parse_args();
+
+    this.expect(TokenType.OPEN_BRACE, "{ expected.");
+
+    const body_statement = this.parse_block_statement();
+
+    this.expect(TokenType.CLOSED_BRACE, "} expected.");
+
+    return {
+      type: "FunctionDeclaration",
+      identifier: identifier,
+      parameters: args,
+      body: body_statement,
+    } as FunctionDeclaration;
+  }
+
+  private parse_block_statement(): Statement {
+    const body: Statement[] = [];
+
+    while (
+      this.currentToken.type != TokenType.CLOSED_BRACE &&
+      this.currentToken.type != TokenType.EOF
+    ) {
+      body.push(this.parse_statement());
+    }
+
+    return {
+      type: "BlockStatement",
+      body: body,
+    } as BlockStatement;
+  }
+
+  private parse_args(): Expression[] {
+    const args: Expression[] = [];
+
+    while (this.currentToken.type != TokenType.CLOSED_PAREN) {
+      if (this.currentToken.type == TokenType.COMA) {
+        this.eat();
+      }
+      const expression = this.parse_expression();
+      args.push(expression);
+    }
+
+    if (this.currentToken.type == TokenType.CLOSED_PAREN) {
+      this.eat();
+    }
+
+    return args;
+  }
+
+  private parse_func_call(): Statement {
+    if (
+      this.currentToken.type == TokenType.IDENTIFIER &&
+      this.nextToken.type == TokenType.OPEN_PAREN
+    ) {
+      const statement = {
+        type: "CallStatement",
+        expression: this.parse_func_expression(),
+      } as CallStatement;
+
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return statement;
+    }
+
+    return this.parse_member_expression();
   }
 
   private parse_primary_expression(): Expression {
