@@ -1,536 +1,1154 @@
 import { describe, expect, test } from "bun:test";
 import { Lexer } from "../lexer/lexer";
 import { Parser } from "./parser";
-import type {
-  AssignmentExpression,
-  BinaryExpression,
-  BlockStatement,
-  CallExpression,
-  CallStatement,
-  Expression,
-  ExpressionStatement,
-  FunctionDeclaration,
-  Identifier,
-  Literal,
-  ReturnStatement,
-  VariableDeclaration,
-} from "./types";
-
-type TestBasicParserType = {
-  expectedLeft: number;
-  expectedRight: number;
-  expectedOperator: "+" | "-" | "/" | "*";
-};
 
 describe("Parser", () => {
-  describe("parse program", () => {
-    test("var declaration no value", () => {
-      const lexer = new Lexer("var a;");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+  describe("basics tests", () => {
+    test("empty program", () => {
+      const code = "";
+      const expected = JSON.stringify({ type: "Program", body: [] });
 
-      expect(program.type).toBe("Program");
+      TestProgram(code, expected);
+    });
+  });
+  describe("var/const tests", () => {
+    test("var declaration with no value", () => {
+      const code = "var a;";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            constant: false,
+          },
+        ],
+      });
 
-      const body = program.body[0] as VariableDeclaration;
-
-      expect(body.type).toBe("VariableDeclaration");
-      expect(body.name).toBe("a");
-      expect(body.constant).toBe(false);
+      TestProgram(code, expected);
     });
 
     test("var declaration with value", () => {
-      const lexer = new Lexer("var a = 5;");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+      const code = "var hello = 5;";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "hello",
+            value: {
+              type: "Literal",
+              value: 5,
+            },
+            constant: false,
+          },
+        ],
+      });
 
-      expect(program.type).toBe("Program");
-
-      const body = program.body[0] as VariableDeclaration;
-
-      expect(body.type).toBe("VariableDeclaration");
-      expect(body.name).toBe("a");
-      expect(body.value?.type).toBe("Literal");
-      expect(body.value?.value).toBe(5);
-      expect(body.constant).toBe(false);
+      TestProgram(code, expected);
     });
 
     test("const declaration with value", () => {
-      const lexer = new Lexer("const a = 10;");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+      const code = "const hello = 5;";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "hello",
+            value: {
+              type: "Literal",
+              value: 5,
+            },
+            constant: true,
+          },
+        ],
+      });
 
-      expect(program.type).toBe("Program");
-
-      const body = program.body[0] as VariableDeclaration;
-
-      expect(body.type).toBe("VariableDeclaration");
-      expect(body.name).toBe("a");
-      expect(body.value?.type).toBe("Literal");
-      expect(body.value?.value).toBe(10);
-      expect(body.constant).toBe(true);
+      TestProgram(code, expected);
     });
 
-    test("basic function call statement", () => {
-      const lexer = new Lexer("print(1);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-
-      expect(program.body[0].type).toBe("CallStatement");
-
-      const call_expr = program.body[0] as CallStatement;
-      const expr = call_expr.expression;
-
-      expect(expr.type).toBe("CallExpression");
-
-      const callee = expr.callee as Identifier;
-      const args = expr.arguments as Expression[];
-
-      expect(callee.type).toBe("Identifier");
-      expect(callee.name).toBe("print");
-
-      expect(args[0].type).toBe("Literal");
-      const num = args[0] as Literal;
-
-      expect(num.value).toBe(1);
+    test("const declaration with call function", () => {
+      const code = "const a = add(1, 2);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            value: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "add",
+              },
+              arguments: [
+                {
+                  type: "Literal",
+                  value: 1,
+                },
+                {
+                  type: "Literal",
+                  value: 2,
+                },
+              ],
+            },
+            constant: true,
+          },
+        ],
+      });
+      TestProgram(code, expected);
     });
 
-    test("basic init const with call function", () => {
-      const lexer = new Lexer("const hello = add(1, 2);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-
-      expect(program.body[0].type).toBe("VariableDeclaration");
-
-      const declaration = program.body[0] as VariableDeclaration;
-
-      expect(declaration.name).toBe("hello");
-      expect(declaration.constant).toBe(true);
-      expect(declaration.value?.type).toBe("CallExpression");
-
-      const expr = declaration.value as CallExpression;
-
-      const callee = expr.callee as Identifier;
-      expect(callee.type).toBe("Identifier");
-      expect(callee.name).toBe("add");
-      const args = expr.arguments as Expression[];
-
-      const num1 = args[0] as Literal;
-      expect(num1.type).toBe("Literal");
-      expect(num1.value).toBe(1);
-
-      const num2 = args[1] as Literal;
-      expect(num2.type).toBe("Literal");
-      expect(num2.value).toBe(2);
+    test("var declaration with call function", () => {
+      const code = "var a = add(1, 2);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            value: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "add",
+              },
+              arguments: [
+                {
+                  type: "Literal",
+                  value: 1,
+                },
+                {
+                  type: "Literal",
+                  value: 2,
+                },
+              ],
+            },
+            constant: false,
+          },
+        ],
+      });
+      TestProgram(code, expected);
     });
 
-    test("basic init var with call function", () => {
-      const lexer = new Lexer("var hello = add(1, 2);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-
-      expect(program.body[0].type).toBe("VariableDeclaration");
-
-      const declaration = program.body[0] as VariableDeclaration;
-
-      expect(declaration.name).toBe("hello");
-      expect(declaration.constant).toBe(false);
-      expect(declaration.value?.type).toBe("CallExpression");
-
-      const expr = declaration.value as CallExpression;
-
-      const callee = expr.callee as Identifier;
-      expect(callee.type).toBe("Identifier");
-      expect(callee.name).toBe("add");
-      const args = expr.arguments as Expression[];
-
-      const num1 = args[0] as Literal;
-      expect(num1.type).toBe("Literal");
-      expect(num1.value).toBe(1);
-
-      const num2 = args[1] as Literal;
-      expect(num2.type).toBe("Literal");
-      expect(num2.value).toBe(2);
+    test("var assign with call function", () => {
+      const code = "var a; a = add(1, 2);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            constant: false,
+          },
+          {
+            type: "ExpressionStatement",
+            expression: {
+              type: "AssignmentExpression",
+              left: {
+                type: "Identifier",
+                name: "a",
+              },
+              right: {
+                type: "CallExpression",
+                callee: {
+                  type: "Identifier",
+                  name: "add",
+                },
+                arguments: [
+                  {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  {
+                    type: "Literal",
+                    value: 2,
+                  },
+                ],
+              },
+              operator: "=",
+            },
+          },
+        ],
+      });
+      TestProgram(code, expected);
     });
 
-    test("basic var assign, with call function", () => {
-      const lexer = new Lexer("var hello; hello = add(5, 1);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("var reassign with call function", () => {
+      const code = "var hello = 0; hello = add(5, 1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "hello",
+            value: {
+              type: "Literal",
+              value: 0,
+            },
+            constant: false,
+          },
+          {
+            type: "ExpressionStatement",
+            expression: {
+              type: "AssignmentExpression",
+              left: {
+                type: "Identifier",
+                name: "hello",
+              },
+              right: {
+                type: "CallExpression",
+                callee: {
+                  type: "Identifier",
+                  name: "add",
+                },
+                arguments: [
+                  {
+                    type: "Literal",
+                    value: 5,
+                  },
+                  {
+                    type: "Literal",
+                    value: 1,
+                  },
+                ],
+              },
+              operator: "=",
+            },
+          },
+        ],
+      });
+      TestProgram(code, expected);
+    });
+  });
 
-      expect(program.type).toBe("Program");
+  describe("native functions call", () => {
+    test("native function call", () => {
+      const code = "print(1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "Literal",
+                  value: 1,
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-      expect(program.body[0].type).toBe("VariableDeclaration");
-      const declaration = program.body[0] as VariableDeclaration;
-      expect(declaration.name).toBe("hello");
+      TestProgram(code, expected);
+    });
+    test("native function call", () => {
+      const code = 'print("Hello world!");';
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "Literal",
+                  value: "Hello world!",
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-      expect(program.body[1].type).toBe("ExpressionStatement");
-      const x = program.body[1] as ExpressionStatement;
+      TestProgram(code, expected);
+    });
+  });
 
-      const b1 = x.expression as AssignmentExpression;
+  describe("nested", () => {
+    test("nested function call", () => {
+      const code = "print( print() );";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "CallExpression",
+                  callee: {
+                    type: "Identifier",
+                    name: "print",
+                  },
+                  arguments: [],
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-      expect(b1.operator).toBe("=");
-
-      const left = b1.left as Identifier;
-      expect(left.name).toBe("hello");
-
-      expect(b1.right.type).toBe("CallExpression");
-      const right = b1.right as CallExpression;
-
-      const callee = right.callee as Identifier;
-      expect(callee.name).toBe("add");
-      const args = right.arguments as Expression[];
-      expect(args[0].type).toBe("Literal");
-      expect(args[1].type).toBe("Literal");
-
-      const a = args[0] as Literal;
-      const b = args[1] as Literal;
-      expect(a.value).toBe(5);
-      expect(b.value).toBe(1);
+      TestProgram(code, expected);
     });
 
-    test("basic var reassign, with call function", () => {
-      const lexer = new Lexer("var hello = 0; hello = add(5, 1);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("nested function call and arguments", () => {
+      // add(add(5, 3) + add(4, 5), 5);
+      const code = "const a = add(add(5, 3) + add(4, 5),5);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            value: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "add",
+              },
+              arguments: [
+                {
+                  type: "BinaryExpression",
+                  left: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "add",
+                    },
+                    arguments: [
+                      {
+                        type: "Literal",
+                        value: 5,
+                      },
+                      {
+                        type: "Literal",
+                        value: 3,
+                      },
+                    ],
+                  },
+                  right: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "add",
+                    },
+                    arguments: [
+                      {
+                        type: "Literal",
+                        value: 4,
+                      },
+                      {
+                        type: "Literal",
+                        value: 5,
+                      },
+                    ],
+                  },
+                  operator: "+",
+                },
+                {
+                  type: "Literal",
+                  value: 5,
+                },
+              ],
+            },
+            constant: true,
+          },
+        ],
+      });
 
-      expect(program.type).toBe("Program");
-
-      expect(program.body[0].type).toBe("VariableDeclaration");
-      const declaration = program.body[0] as VariableDeclaration;
-      expect(declaration.name).toBe("hello");
-      expect(declaration.value?.type).toBe("Literal");
-
-      const t = declaration.value as Literal;
-      expect(t.value).toBe(0);
-
-      expect(program.body[1].type).toBe("ExpressionStatement");
-      const x = program.body[1] as ExpressionStatement;
-
-      const b1 = x.expression as AssignmentExpression;
-
-      expect(b1.operator).toBe("=");
-
-      const left = b1.left as Identifier;
-      expect(left.name).toBe("hello");
-
-      expect(b1.right.type).toBe("CallExpression");
-      const right = b1.right as CallExpression;
-
-      const callee = right.callee as Identifier;
-      expect(callee.name).toBe("add");
-      const args = right.arguments as Expression[];
-      expect(args[0].type).toBe("Literal");
-      expect(args[1].type).toBe("Literal");
-
-      const a = args[0] as Literal;
-      const b = args[1] as Literal;
-      expect(a.value).toBe(5);
-      expect(b.value).toBe(1);
+      TestProgram(code, expected);
     });
+  });
 
-    test("valid nested functions", () => {
-      const lexer = new Lexer("print( print() );");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+  describe("function declaration", () => {
+    test("basic function declaration", () => {
+      const code = "function add(a) {     print(); }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "FunctionDeclaration",
+            identifier: {
+              type: "Identifier",
+              name: "add",
+            },
+            parameters: [
+              {
+                type: "Identifier",
+                name: "a",
+              },
+            ],
+            body: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "CallStatement",
+                  expression: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "print",
+                    },
+                    arguments: [],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-      expect(program.type).toBe("Program");
-    });
-
-    test("valid nested functions", () => {
-      const lexer = new Lexer("const a = add(add(5, 3) + add(4, 5), 5);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-    });
-
-    test("valid nested functions", () => {
-      const lexer = new Lexer("const a = add((add(5, 3) + add(4, 5)), 5);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-    });
-
-    test("valid nested functions", () => {
-      const lexer = new Lexer(
-        "const a = add((add(5, add(1,3)) + add(4, 5)), 5);",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-    });
-
-    test("valid program functions call", () => {
-      const lexer = new Lexer("var a; a = add(5,3);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-    });
-
-    test("valid program functions call", () => {
-      const lexer = new Lexer("var a; a = add(5,3) + add(4,3);");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-    });
-
-    test("valid program functions call", () => {
-      const lexer = new Lexer(
-        "var a = add(1, 5 * add(5,5) ) + add(2,2);  const x = a + add(1,1) * 5; print(x * 10);",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-    });
-
-    test("valid program functions call", () => {
-      const lexer = new Lexer(
-        "var a = add(1, 5 * add(5,5) ) + add(2,2) * 45;  const H = 850; const J = add(7,7) * 777 + a;  const x = (a + add(1,1) * 5) * 10 + H / J; print(print(x * 10));",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-    });
-
-    test("declare function", () => {
-      const lexer = new Lexer("function add(a) {     print(); }");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
-
-      expect(program.body[0].type).toBe("FunctionDeclaration");
-
-      const b1 = program.body[0] as FunctionDeclaration;
-      const identifier = b1.identifier as Identifier;
-
-      expect(identifier.type).toBe("Identifier");
-      expect(identifier.name).toBe("add");
-
-      const parameters = b1.parameters;
-
-      expect(parameters[0].type).toBe("Identifier");
-      expect(parameters[0].name).toBe("a");
-
-      expect(b1.body.type).toBe("BlockStatement");
-      const bs = b1.body as BlockStatement;
-
-      const body = bs.body;
-
-      const bb = body[0] as CallStatement;
-
-      const expr = bb.expression;
-
-      expect(expr.type).toBe("CallExpression");
-
-      const callee = expr.callee as Identifier;
-      expect(callee.name).toBe("print");
-    });
-
-    test("valid program functions call", () => {
-      const lexer = new Lexer(
-        "function add(a, b) {     const z = 0;     var x = (a * 5) * add(1, z);     print(a, x * 10 + add(5,5)); }",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-
-      expect(program.type).toBe("Program");
+      TestProgram(code, expected);
     });
 
     test("return statement", () => {
-      const lexer = new Lexer(" function one(a, b) {     return a + b; }");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+      const code = "function add(a) {     return a + b; }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "FunctionDeclaration",
+            identifier: {
+              type: "Identifier",
+              name: "add",
+            },
+            parameters: [
+              {
+                type: "Identifier",
+                name: "a",
+              },
+            ],
+            body: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "ReturnStatement",
+                  argument: {
+                    type: "BinaryExpression",
+                    left: {
+                      type: "Identifier",
+                      name: "a",
+                    },
+                    right: {
+                      type: "Identifier",
+                      name: "b",
+                    },
+                    operator: "+",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-      expect(program.type).toBe("Program");
-
-      expect(program.body[0].type).toBe("FunctionDeclaration");
-
-      const function_declaration = program.body[0] as FunctionDeclaration;
-
-      expect(function_declaration.body.type).toBe("BlockStatement");
-
-      const body = function_declaration.body as BlockStatement;
-
-      expect(body.body[0].type).toBe("ReturnStatement");
-      const rs = body.body[0] as ReturnStatement;
-
-      const args = rs.argument;
-      expect(args.type).toBe("BinaryExpression");
-
-      const be = args as BinaryExpression;
-
-      expect(be.left.type).toBe("Identifier");
-      const left = be.left as Identifier;
-      expect(left.name).toBe("a");
-
-      expect(be.right.type).toBe("Identifier");
-      const right = be.right as Identifier;
-      expect(right.name).toBe("b");
+      TestProgram(code, expected);
     });
 
-    test("return statement", () => {
-      const lexer = new Lexer(" function one(a, b) {     return (a + b); }");
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("return statement parenthesis", () => {
+      const code = "function add(a) {     return (a + b); }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "FunctionDeclaration",
+            identifier: {
+              type: "Identifier",
+              name: "add",
+            },
+            parameters: [
+              {
+                type: "Identifier",
+                name: "a",
+              },
+            ],
+            body: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "ReturnStatement",
+                  argument: {
+                    type: "BinaryExpression",
+                    left: {
+                      type: "Identifier",
+                      name: "a",
+                    },
+                    right: {
+                      type: "Identifier",
+                      name: "b",
+                    },
+                    operator: "+",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-      expect(program.type).toBe("Program");
-
-      expect(program.body[0].type).toBe("FunctionDeclaration");
-
-      const function_declaration = program.body[0] as FunctionDeclaration;
-
-      expect(function_declaration.body.type).toBe("BlockStatement");
-      const bs = function_declaration.body as BlockStatement;
-
-      expect(bs.body[0].type).toBe("ReturnStatement");
-
-      const body = bs.body[0] as ReturnStatement;
-
-      expect(body.argument.type).toBe("BinaryExpression");
-      const be = body.argument as BinaryExpression;
-
-      expect(be.operator).toBe("+");
-
-      expect(be.left.type).toBe("Identifier");
-      const left = be.left as Identifier;
-      expect(left.name).toBe("a");
-
-      expect(be.right.type).toBe("Identifier");
-      const right = be.right as Identifier;
-      expect(right.name).toBe("b");
+      TestProgram(code, expected);
     });
 
-    test("valid program function call", () => {
-      const lexer = new Lexer(
-        "function add(a, b) {           return a + b;       }       print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("empty return", () => {
+      const code = "function add(a) {     return; }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "FunctionDeclaration",
+            identifier: {
+              type: "Identifier",
+              name: "add",
+            },
+            parameters: [
+              {
+                type: "Identifier",
+                name: "a",
+              },
+            ],
+            body: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "ReturnStatement",
+                  argument: {
+                    type: "Literal",
+                    value: null,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+  });
+
+  describe("strings", () => {
+    test("basic string in function call", () => {
+      const code = 'print("Hello world");';
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "Literal",
+                  value: "Hello world",
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+  });
+
+  describe("if/else if/else", () => {
+    test("basic empty if statement", () => {
+      const code = "if (1) { }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "IfStatement",
+            test: {
+              type: "Literal",
+              value: 1,
+            },
+            consequent: {
+              type: "BlockStatement",
+              body: [],
+            },
+            alternate: null,
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program function call", () => {
-      const lexer = new Lexer(
-        "function add(a, b) {     return a + b;     return (a+b); }  print(  add( add( add(10,10), add(10,10) ) , add( add(2,2), add(2,2) ) )  ); -- should return 48",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("basic if statement with function call", () => {
+      const code = "if (1) { print(); }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "IfStatement",
+            test: {
+              type: "Literal",
+              value: 1,
+            },
+            consequent: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "CallStatement",
+                  expression: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "print",
+                    },
+                    arguments: [],
+                  },
+                },
+              ],
+            },
+            alternate: null,
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+    test("basic if/else", () => {
+      const code = "if (1) { print(1); } else { print(2); }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "IfStatement",
+            test: {
+              type: "Literal",
+              value: 1,
+            },
+            consequent: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "CallStatement",
+                  expression: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "print",
+                    },
+                    arguments: [
+                      {
+                        type: "Literal",
+                        value: 1,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            alternate: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "CallStatement",
+                  expression: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "print",
+                    },
+                    arguments: [
+                      {
+                        type: "Literal",
+                        value: 2,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program function call", () => {
-      const lexer = new Lexer(
-        "function add(a, b) {     return a + b; }  const a = add(5, 5); const b = add(10, 10);  print(a, b);",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("basic if/else if/else", () => {
+      const code =
+        "if (1) { print(1); } else if (2) { print(2); } else { print(3); }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "IfStatement",
+            test: {
+              type: "Literal",
+              value: 1,
+            },
+            consequent: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "CallStatement",
+                  expression: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "print",
+                    },
+                    arguments: [
+                      {
+                        type: "Literal",
+                        value: 1,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            alternate: {
+              type: "IfStatement",
+              test: {
+                type: "Literal",
+                value: 2,
+              },
+              consequent: {
+                type: "BlockStatement",
+                body: [
+                  {
+                    type: "CallStatement",
+                    expression: {
+                      type: "CallExpression",
+                      callee: {
+                        type: "Identifier",
+                        name: "print",
+                      },
+                      arguments: [
+                        {
+                          type: "Literal",
+                          value: 2,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              alternate: {
+                type: "BlockStatement",
+                body: [
+                  {
+                    type: "CallStatement",
+                    expression: {
+                      type: "CallExpression",
+                      callee: {
+                        type: "Identifier",
+                        name: "print",
+                      },
+                      arguments: [
+                        {
+                          type: "Literal",
+                          value: 3,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+  });
+
+  describe("rational operators", () => {
+    test("== operators", () => {
+      const code = "print(1 == 1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "BinaryExpression",
+                  left: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  right: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  operator: "==",
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program function call", () => {
-      const lexer = new Lexer(
-        "function add(a, b) {     return a + b; }  const a = add(5, 5); const b = add(10, 10);  var c = add(a, b);  print(c);",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("!= operators", () => {
+      const code = "print(1 != 1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "BinaryExpression",
+                  left: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  right: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  operator: "!=",
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program strings", () => {
-      const lexer = new Lexer(
-        'print("Hello world!"); print("Hello" + " " + "world!");  const a = "Hello world!"; const b = "Hello " + "world!"; print(a); print(b); print("result: ", a+b);',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("> operators", () => {
+      const code = "print(1 > 1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "BinaryExpression",
+                  left: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  right: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  operator: ">",
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program if", () => {
-      const lexer = new Lexer(
-        'function test(a) {     if (a) {         print("You can pass here!");     }      print("and here"); }  test(1);',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test(">= operators", () => {
+      const code = "print(1 >= 1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "BinaryExpression",
+                  left: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  right: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  operator: ">=",
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program if", () => {
-      const lexer = new Lexer(
-        'if (1) {     print("hello"); }  if (0) {     print("world"); }',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("< operators", () => {
+      const code = "print(1 < 1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "BinaryExpression",
+                  left: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  right: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  operator: "<",
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program if", () => {
-      const lexer = new Lexer(
-        'function format_hello(a) {     var s = "";      if (a) {         s = s + "hello ";     }      s = s + "world";      return s; }  print(format_hello(1)); -- return "hello world" print(format_hello(0)); -- return "world"',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("<= operators", () => {
+      const code = "print(1 <= 1);";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "CallStatement",
+            expression: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "print",
+              },
+              arguments: [
+                {
+                  type: "BinaryExpression",
+                  left: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  right: {
+                    type: "Literal",
+                    value: 1,
+                  },
+                  operator: "<=",
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+  });
+
+  describe("while", () => {
+    test("basic while", () => {
+      const code = "while(1) {  }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "WhileStatement",
+            test: {
+              type: "Literal",
+              value: 1,
+            },
+            body: {
+              type: "BlockStatement",
+              body: [],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program test operators", () => {
-      const lexer = new Lexer(
-        'function hello(n) {     if (n == 2) {         print("n == 2");     }      if (n > 2) {         print("n > 2");     }      if (n >= 2) {         print("n >= 2");     }      if (n < 2) {         print("n < 2");     }      if (n <= 2) {         print("n <= 2");     } }  hello(1); print(); hello(2); print(); hello(3);',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+    test("while with function call", () => {
+      const code = "while(1) { print(1); }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "WhileStatement",
+            test: {
+              type: "Literal",
+              value: 1,
+            },
+            body: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "CallStatement",
+                  expression: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "print",
+                    },
+                    arguments: [
+                      {
+                        type: "Literal",
+                        value: 1,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
     });
 
-    test("valid program test operators", () => {
-      const lexer = new Lexer(
-        'function hello(n) {     if (n == 2) {         print("n == 2");     }      if (n > 2) {         print("n > 2");     }      if (n >= 2) {         print("n >= 2");     }      if (n < 2) {         print("n < 2");     }      if (n <= 2) {         print("n <= 2");     }      if (n != 2) {         print("n != 2");     } }  print("1:"); hello(1); print(); print("2:"); hello(2); print(); print("3:"); hello(3);',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-    });
+    test("while with many body statement", () => {
+      const code = "while(1) { print(1); var a; a = 1; }";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "WhileStatement",
+            test: {
+              type: "Literal",
+              value: 1,
+            },
+            body: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "CallStatement",
+                  expression: {
+                    type: "CallExpression",
+                    callee: {
+                      type: "Identifier",
+                      name: "print",
+                    },
+                    arguments: [
+                      {
+                        type: "Literal",
+                        value: 1,
+                      },
+                    ],
+                  },
+                },
+                {
+                  type: "VariableDeclaration",
+                  name: "a",
+                  constant: false,
+                },
+                {
+                  type: "ExpressionStatement",
+                  expression: {
+                    type: "AssignmentExpression",
+                    left: {
+                      type: "Identifier",
+                      name: "a",
+                    },
+                    right: {
+                      type: "Literal",
+                      value: 1,
+                    },
+                    operator: "=",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
 
-    test("valid program test empty return", () => {
-      const lexer = new Lexer(
-        "function empty() {     return; }  print(empty());",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
+      TestProgram(code, expected);
     });
+  });
 
-    test("valid program if else if else", () => {
-      const lexer = new Lexer(
-        'function test(a) {     if (a == 1) {         print("a is 1");     } else if (a == 2) {         print("a is 2");     } else if (a == 3) {         print("a is 3");     } else {         print("nonono");     }      var a = 1;      print(a);      return "hello"; }  print(test(4));',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-    });
+  describe("arrays", () => {
+    test("basic var array declaration", () => {
+      const code = 'var a = [1,2, 3, 777, "hello"];';
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            value: {
+              type: "ArrayExpression",
+              elements: [
+                { type: "Literal", value: 1 },
+                { type: "Literal", value: 2 },
+                { type: "Literal", value: 3 },
+                { type: "Literal", value: 777 },
+                { type: "Literal", value: "hello" },
+              ],
+            },
+            constant: false,
+          },
+        ],
+      });
 
-    test("valid program if else if else 2", () => {
-      const lexer = new Lexer(
-        'function test(a) {     if (a == 1) {         print("a is 1");     } else if (a == 2) {         print("a is 2");     } else if (a == 3) {         print("a is 3");     } else {         print("nonono");     }      var a = 1;      print(a);      return "hello"; }  print(test(4));',
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-    });
-
-    test("valid program while", () => {
-      const lexer = new Lexer(
-        "var a = 1; while (a < 10) {     print(a);     a = a + 1; }",
-      );
-      const parser = new Parser(lexer);
-      const program = parser.parse();
-    });
-
-    test("valid program array", () => {
-      const lexer = new Lexer(
-        'var b = 1; var a = ["hello", "world", 777]; print("Hello world!", a);',
-      );
-      const parser = new Parser(lexer);
-      parser.parse();
+      TestProgram(code, expected);
     });
   });
 });
+
+function TestProgram(code: string, expected: string) {
+  const lexer = new Lexer(code);
+  const parser = new Parser(lexer);
+  const received = parser.parse();
+
+  expect(expected).toBe(JSON.stringify(received));
+}
