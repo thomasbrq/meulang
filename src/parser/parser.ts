@@ -1,6 +1,7 @@
 import type { Lexer } from "../lexer/lexer";
 import { TokenType, type Token } from "../lexer/token";
 import type {
+  ArrayExpression,
   AssignmentExpression,
   BinaryExpression,
   BlockStatement,
@@ -12,6 +13,7 @@ import type {
   Identifier,
   IfStatement,
   Literal,
+  MemberExpression,
   Program,
   ReturnStatement,
   Statement,
@@ -246,6 +248,17 @@ export class Parser {
       return statement;
     }
 
+    if (this.currentToken.type == TokenType.IDENTIFIER && this.nextToken.type == TokenType.OPEN_BRACKET) {
+      const statement = {
+        type: "ExpressionStatement",
+        expression: this.parse_expression()
+      } as ExpressionStatement;
+      
+      this.expect(TokenType.SEMI_COLON, "; expected.");
+
+      return statement;
+    }
+
     return this.parse_expression();
   }
 
@@ -373,7 +386,7 @@ export class Parser {
       } as CallExpression;
     }
 
-    return this.parse_primary_expression();
+    return this.parse_member_expression();
   }
 
   private parse_func_call(): Statement {
@@ -391,6 +404,21 @@ export class Parser {
       return statement;
     }
 
+    return this.parse_member_expression();
+  }
+
+  private parse_member_expression(): Expression {
+    if (this.currentToken.type == TokenType.IDENTIFIER && this.nextToken.type == TokenType.OPEN_BRACKET) {
+      const identifier = this.parse_primary_expression();
+      this.eat();
+      const offset = this.parse_expression();
+      this.expect(TokenType.CLOSED_BRACKET, "] expected.");
+      return {
+        type: "MemberExpression",
+        object: identifier,
+        property: offset,
+      } as MemberExpression;
+    }
     return this.parse_primary_expression();
   }
 
@@ -474,6 +502,15 @@ export class Parser {
         this.expect(TokenType.CLOSED_PAREN, "No closed parenthesis found.");
         return value;
       }
+      case TokenType.OPEN_BRACKET: {
+        this.eat();
+        const elements = this.parse_array();
+        this.expect(TokenType.CLOSED_BRACKET, "] expected.");
+        return {
+          type: "ArrayExpression",
+          elements: elements,
+        } as ArrayExpression;
+      }
       default: {
         console.log(this.currentToken);
         console.error(
@@ -482,5 +519,19 @@ export class Parser {
         process.exit(1);
       }
     }
+  }
+
+  private parse_array() {
+    const elements = [];
+
+    while (this.currentToken.type != TokenType.CLOSED_BRACKET) {
+      if (this.currentToken.type == TokenType.COMA) {
+        this.eat();
+      }
+      const element = this.parse_primary_expression();
+      elements.push(element);
+    }
+
+    return elements;
   }
 }

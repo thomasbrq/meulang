@@ -7,6 +7,8 @@ export enum TokenType {
   CLOSED_PAREN = ")",
   OPEN_BRACE = "{",
   CLOSED_BRACE = "}",
+  OPEN_BRACKET = "[",
+  CLOSED_BRACKET = "]",
 
   INT = "INT",
   STRING = "STRING",

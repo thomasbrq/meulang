@@ -524,5 +524,13 @@ describe("Parser", () => {
       const parser = new Parser(lexer);
       const program = parser.parse();
     });
+
+    test("valid program array", () => {
+      const lexer = new Lexer(
+        'var b = 1; var a = ["hello", "world", 777]; print("Hello world!", a);',
+      );
+      const parser = new Parser(lexer);
+      parser.parse();
+    });
   });
 });

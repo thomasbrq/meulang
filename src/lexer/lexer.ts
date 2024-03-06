@@ -179,6 +179,16 @@ export class Lexer {
           token = this.new_token(TokenType.CLOSED_PAREN, this.data.character);
         }
         break;
+      case "[":
+        {
+          token = this.new_token(TokenType.OPEN_BRACKET, this.data.character);
+        }
+        break;
+      case "]":
+        {
+          token = this.new_token(TokenType.CLOSED_BRACKET, this.data.character);
+        }
+        break;
       case ";":
         {
           token = this.new_token(TokenType.SEMI_COLON, this.data.character);
