@@ -474,7 +474,7 @@ export class Parser {
     let token = this.currentToken;
 
     switch (token.type) {
-      case TokenType.INT: {
+      case TokenType.NUMBER: {
         let expression: Literal = {
           type: "Literal",
           value: parseInt(token.value),

@@ -281,7 +281,7 @@ export class Lexer {
 
         if (this.is_digit(this.data.character)) {
           let digits = this.parse_digits();
-          return this.new_token(TokenType.INT, digits);
+          return this.new_token(TokenType.NUMBER, digits);
         }
 
         return this.new_token(TokenType.ILLEGAL, this.data.character);

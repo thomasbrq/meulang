@@ -10,7 +10,7 @@ export enum TokenType {
   OPEN_BRACKET = "[",
   CLOSED_BRACKET = "]",
 
-  INT = "INT",
+  NUMBER = "NUMBER",
   STRING = "STRING",
   PLUS = "+",
   MINUS = "-",
