@@ -109,9 +109,9 @@ describe("Lexer class", () => {
     test("no whitespace", () => {
       const lexer = new LexerTest("1+1");
       const expecteds: TestTokenType[] = [
-        { expectedType: TokenType.INT, expectedValue: "1" },
+        { expectedType: TokenType.NUMBER, expectedValue: "1" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
-        { expectedType: TokenType.INT, expectedValue: "1" },
+        { expectedType: TokenType.NUMBER, expectedValue: "1" },
       ];
       testTokens(lexer, expecteds);
     });
@@ -119,27 +119,28 @@ describe("Lexer class", () => {
     test("whitespaces.", () => {
       const lexer = new LexerTest("5            +         5     ");
       const expecteds: TestTokenType[] = [
-        { expectedType: TokenType.INT, expectedValue: "5" },
+        { expectedType: TokenType.NUMBER, expectedValue: "5" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
-        { expectedType: TokenType.INT, expectedValue: "5" },
+        { expectedType: TokenType.NUMBER, expectedValue: "5" },
       ];
       testTokens(lexer, expecteds);
     });
 
     test("whitespaces and newline", () => {
       const lexer = new LexerTest(
-        "777            +  777 +        5 + \n 55+12     ",
+        "777            +  777 +        5 + \n 55+12     777.777",
       );
       const expecteds: TestTokenType[] = [
-        { expectedType: TokenType.INT, expectedValue: "777" },
+        { expectedType: TokenType.NUMBER, expectedValue: "777" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
-        { expectedType: TokenType.INT, expectedValue: "777" },
+        { expectedType: TokenType.NUMBER, expectedValue: "777" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
-        { expectedType: TokenType.INT, expectedValue: "5" },
+        { expectedType: TokenType.NUMBER, expectedValue: "5" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
-        { expectedType: TokenType.INT, expectedValue: "55" },
+        { expectedType: TokenType.NUMBER, expectedValue: "55" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
-        { expectedType: TokenType.INT, expectedValue: "12" },
+        { expectedType: TokenType.NUMBER, expectedValue: "12" },
+        { expectedType: TokenType.NUMBER, expectedValue: "777.777" },
       ];
       testTokens(lexer, expecteds);
     });
@@ -153,7 +154,7 @@ describe("Lexer class", () => {
         { expectedType: TokenType.MINUS, expectedValue: "-" },
         { expectedType: TokenType.MULT, expectedValue: "*" },
         { expectedType: TokenType.DIV, expectedValue: "/" },
-        { expectedType: TokenType.INT, expectedValue: "1" },
+        { expectedType: TokenType.NUMBER, expectedValue: "1" },
         { expectedType: TokenType.SEMI_COLON, expectedValue: ";" },
         { expectedType: TokenType.ASSIGN, expectedValue: "=" },
         { expectedType: TokenType.OPEN_BRACE, expectedValue: "{" },

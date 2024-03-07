@@ -1118,7 +1118,7 @@ describe("Parser", () => {
 
   describe("arrays", () => {
     test("basic var array declaration", () => {
-      const code = 'var a = [1,2, 3, 777, "hello"];';
+      const code = 'var a = [1,2, 3, 777, "hello", 777.777];';
       const expected = JSON.stringify({
         type: "Program",
         body: [
@@ -1133,6 +1133,7 @@ describe("Parser", () => {
                 { type: "Literal", value: 3 },
                 { type: "Literal", value: 777 },
                 { type: "Literal", value: "hello" },
+                { type: "Literal", value: 777.777 },
               ],
             },
             constant: false,

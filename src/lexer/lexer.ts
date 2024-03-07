@@ -48,7 +48,7 @@ export class Lexer {
     if (character.length > 1) {
       return false;
     }
-    return character >= "0" && character <= "9";
+    return (character >= "0" && character <= "9") || character == ".";
   }
 
   protected is_alpha(character: string): boolean {
@@ -281,7 +281,7 @@ export class Lexer {
 
         if (this.is_digit(this.data.character)) {
           let digits = this.parse_digits();
-          return this.new_token(TokenType.INT, digits);
+          return this.new_token(TokenType.NUMBER, digits);
         }
 
         return this.new_token(TokenType.ILLEGAL, this.data.character);
