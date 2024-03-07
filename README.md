@@ -3,6 +3,8 @@
 > [!NOTE]
 > Work in progress
 
+[Documentation](DOCUMENTATION.md)
+
 To install dependencies:
 
 ```bash
