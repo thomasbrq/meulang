@@ -48,7 +48,7 @@ export class Lexer {
     if (character.length > 1) {
       return false;
     }
-    return character >= "0" && character <= "9";
+    return (character >= "0" && character <= "9") || character == ".";
   }
 
   protected is_alpha(character: string): boolean {
