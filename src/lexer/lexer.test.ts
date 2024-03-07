@@ -128,7 +128,7 @@ describe("Lexer class", () => {
 
     test("whitespaces and newline", () => {
       const lexer = new LexerTest(
-        "777            +  777 +        5 + \n 55+12     ",
+        "777            +  777 +        5 + \n 55+12     777.777",
       );
       const expecteds: TestTokenType[] = [
         { expectedType: TokenType.NUMBER, expectedValue: "777" },
@@ -140,6 +140,7 @@ describe("Lexer class", () => {
         { expectedType: TokenType.NUMBER, expectedValue: "55" },
         { expectedType: TokenType.PLUS, expectedValue: "+" },
         { expectedType: TokenType.NUMBER, expectedValue: "12" },
+        { expectedType: TokenType.NUMBER, expectedValue: "777.777" },
       ];
       testTokens(lexer, expecteds);
     });
