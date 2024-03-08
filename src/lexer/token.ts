@@ -51,4 +51,5 @@ export const keywords = new Map<string, TokenType>([
   ["if", TokenType.IF],
   ["else", TokenType.ELSE],
   ["while", TokenType.WHILE],
+  ["null", TokenType.NULL],
 ]);

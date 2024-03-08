@@ -28,6 +28,46 @@ describe("Parser", () => {
       TestProgram(code, expected);
     });
 
+    test("var declaration with null value", () => {
+      const code = "var a = null;";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            value: {
+              type: "Literal",
+              value: null
+            },
+            constant: false,
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+
+    test("const declaration with null value", () => {
+      const code = "const a = null;";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            value: {
+              type: "Literal",
+              value: null
+            },
+            constant: true,
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+
     test("var declaration with value", () => {
       const code = "var hello = 5;";
       const expected = JSON.stringify({
@@ -1118,7 +1158,7 @@ describe("Parser", () => {
 
   describe("arrays", () => {
     test("basic var array declaration", () => {
-      const code = 'var a = [1,2, 3, 777, "hello", 777.777];';
+      const code = 'var a = [1,2, 3, 777, "hello", 777.777, null];';
       const expected = JSON.stringify({
         type: "Program",
         body: [
@@ -1134,6 +1174,7 @@ describe("Parser", () => {
                 { type: "Literal", value: 777 },
                 { type: "Literal", value: "hello" },
                 { type: "Literal", value: 777.777 },
+                { type: "Literal", value: null },
               ],
             },
             constant: false,

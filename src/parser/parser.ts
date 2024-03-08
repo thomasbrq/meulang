@@ -494,6 +494,16 @@ export class Parser {
 
         return string;
       }
+      case TokenType.NULL: {
+        const null_value = {
+          type: "Literal",
+          value: null
+        } as Literal;
+
+        this.eat();
+
+        return null_value
+      }
       case TokenType.IDENTIFIER: {
         const identifier = {
           type: "Identifier",
