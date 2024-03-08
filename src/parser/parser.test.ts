@@ -28,6 +28,26 @@ describe("Parser", () => {
       TestProgram(code, expected);
     });
 
+    test("var declaration with null value", () => {
+      const code = "var a = null;";
+      const expected = JSON.stringify({
+        type: "Program",
+        body: [
+          {
+            type: "VariableDeclaration",
+            name: "a",
+            value: {
+              type: "Literal",
+              value: null
+            },
+            constant: false,
+          },
+        ],
+      });
+
+      TestProgram(code, expected);
+    });
+
     test("var declaration with value", () => {
       const code = "var hello = 5;";
       const expected = JSON.stringify({
