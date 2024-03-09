@@ -1,6 +1,5 @@
 export enum TokenType {
   ILLEGAL = "ILLEGAL",
-  NULL = "NULL",
   EOF = "EOF",
 
   OPEN_PAREN = "(",
@@ -9,23 +8,6 @@ export enum TokenType {
   CLOSED_BRACE = "}",
   OPEN_BRACKET = "[",
   CLOSED_BRACKET = "]",
-
-  NUMBER = "NUMBER",
-  STRING = "STRING",
-  PLUS = "+",
-  MINUS = "-",
-  MULT = "*",
-  DIV = "/",
-
-  IDENTIFIER = "IDENTIFIER",
-  FUNCTION = "FUNCTION",
-  RETURN = "RETURN",
-  VAR = "VAR",
-  CONST = "CONST",
-  IF = "IF",
-  ELSE = "ELSE",
-  WHILE = "WHILE",
-
   ASSIGN = "=",
   SEMI_COLON = ";",
   COMA = ",",
@@ -36,6 +18,24 @@ export enum TokenType {
   LT = "<",
   LE = "<=",
   DT = "!=",
+
+  PLUS = "+",
+  MINUS = "-",
+  MULT = "*",
+  DIV = "/",
+
+  IDENTIFIER = "IDENTIFIER",
+  NUMBER = "NUMBER",
+  STRING = "STRING",
+
+  FUNCTION = "FUNCTION",
+  RETURN = "RETURN",
+  VAR = "VAR",
+  CONST = "CONST",
+  IF = "IF",
+  ELSE = "ELSE",
+  WHILE = "WHILE",
+  NULL = "NULL",
 }
 
 export type Token = {

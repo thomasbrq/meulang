@@ -7,16 +7,8 @@ class LexerTest extends Lexer {
     super(source);
   }
 
-  IsDigit(character: string): boolean {
-    return this.is_digit(character);
-  }
-
-  IsAlphaNum(character: string): boolean {
-    return this.is_alphanum(character);
-  }
-
-  ParseDigits(): string {
-    return this.parse_digits();
+  ParseNumber(): string {
+    return this.parse_number();
   }
 
   NextToken(): Token {
@@ -38,51 +30,10 @@ describe("Lexer class", () => {
     }
   }
 
-  describe("is_digit", () => {
-    const lexer = new LexerTest("1+1");
-
-    it("should return true when valid digits", () => {
-      expect(lexer.IsDigit("1")).toBe(true);
-      expect(lexer.IsDigit("5")).toBe(true);
-      expect(lexer.IsDigit("9")).toBe(true);
-      expect(lexer.IsDigit("3")).toBe(true);
-    });
-
-    it("should return false when invalid.", () => {
-      expect(lexer.IsDigit("10")).toBe(false);
-      expect(lexer.IsDigit("-1")).toBe(false);
-      expect(lexer.IsDigit("")).toBe(false);
-      expect(lexer.IsDigit("x")).toBe(false);
-      expect(lexer.IsDigit("abc")).toBe(false);
-      expect(lexer.IsDigit("O")).toBe(false);
-      expect(lexer.IsDigit("o")).toBe(false);
-      expect(lexer.IsDigit("😀")).toBe(false);
-    });
-  });
-
-  describe("is_alphanum", () => {
-    const lexer = new LexerTest("abc");
-    it("should return true when valid alphanum", () => {
-      expect(lexer.IsAlphaNum("a")).toBe(true);
-      expect(lexer.IsAlphaNum("x")).toBe(true);
-      expect(lexer.IsAlphaNum("Z")).toBe(true);
-      expect(lexer.IsAlphaNum("D")).toBe(true);
-      expect(lexer.IsAlphaNum("1")).toBe(true);
-      expect(lexer.IsAlphaNum("5")).toBe(true);
-      expect(lexer.IsAlphaNum("_")).toBe(true);
-    });
-    it("should return false when invalid alphanum", () => {
-      expect(lexer.IsAlphaNum("-")).toBe(false);
-      expect(lexer.IsAlphaNum("((")).toBe(false);
-      expect(lexer.IsAlphaNum(";")).toBe(false);
-      expect(lexer.IsAlphaNum(";")).toBe(false);
-    });
-  });
-
   describe("parse_digits", () => {
     it("should return '123'", () => {
       const lexer = new LexerTest("123");
-      const result = lexer.ParseDigits();
+      const result = lexer.ParseNumber();
 
       expect(result).toBe("123");
       expect(typeof result).toBe("string");
@@ -90,7 +41,7 @@ describe("Lexer class", () => {
 
     it("should return '1'", () => {
       const lexer = new LexerTest("1 + 1");
-      const result = lexer.ParseDigits();
+      const result = lexer.ParseNumber();
 
       expect(result).toBe("1");
       expect(typeof result).toBe("string");
@@ -98,7 +49,7 @@ describe("Lexer class", () => {
 
     it("should return ''", () => {
       const lexer = new LexerTest("");
-      const result = lexer.ParseDigits();
+      const result = lexer.ParseNumber();
 
       expect(result).toBe("");
       expect(typeof result).toBe("string");
@@ -167,7 +118,9 @@ describe("Lexer class", () => {
     });
 
     test("keyword tokens", () => {
-      const lexer = new LexerTest("const var function return if else while null");
+      const lexer = new LexerTest(
+        "const var function return if else while null",
+      );
       const expecteds: TestTokenType[] = [
         { expectedType: TokenType.CONST, expectedValue: "const" },
         { expectedType: TokenType.VAR, expectedValue: "var" },
