@@ -65,7 +65,7 @@ export class Lexer {
     }
 
     const is_alpha = this.is_alpha(character);
-    const is_num = this.is_digit(character);
+    const is_num = character >= "0" && character <= "9";
 
     return is_alpha || is_num;
   }
