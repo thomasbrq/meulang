@@ -1,14 +1,21 @@
 import { TokenType, type Token, keywords } from "./token";
+import { Utils } from "./utils";
 
-export type LexerType = {
+type LexerDataType = {
   source: string;
   position: number;
   nextPosition: number;
   character: string;
 };
 
+type CurrentDataType = {
+  current: string;
+  next: string;
+};
+
 export class Lexer {
-  public data: LexerType;
+  public data: LexerDataType;
+  private utils: Utils;
 
   constructor(source: string) {
     this.data = {
@@ -17,10 +24,18 @@ export class Lexer {
       nextPosition: 0,
       character: "",
     };
+    this.utils = new Utils();
     this.read_character();
   }
 
-  protected read_character() {
+  get_current_data() {
+    return {
+      current: this.data.character,
+      next: this.data.source[this.data.nextPosition],
+    } as CurrentDataType;
+  }
+
+  read_character() {
     if (this.is_eof()) {
       this.data.character = "";
     } else {
@@ -30,113 +45,52 @@ export class Lexer {
     this.data.nextPosition += 1;
   }
 
-  public is_eof(): boolean {
+  is_eof(): boolean {
     if (this.data.position >= this.data.source.length) {
       return true;
     }
     return false;
   }
 
-  protected new_token(type: string, value: string): Token {
-    return {
-      type,
-      value,
-    };
+  new_token(type: string, value: string): Token {
+    return { type, value } as Token;
   }
 
-  protected is_digit(character: string): boolean {
-    if (character.length > 1) {
-      return false;
-    }
-    return (character >= "0" && character <= "9") || character == ".";
-  }
-
-  protected is_alpha(character: string): boolean {
-    return (
-      (character >= "a" && character <= "z") ||
-      (character >= "A" && character <= "Z") ||
-      character == "_"
-    );
-  }
-
-  protected is_alphanum(character: string): boolean {
-    if (character.length > 1) {
-      return false;
-    }
-
-    const is_alpha = this.is_alpha(character);
-    const is_num = character >= "0" && character <= "9";
-
-    return is_alpha || is_num;
-  }
-
-  protected parse_digits(): string {
-    let string = "";
-
-    while (!this.is_eof() && this.is_digit(this.data.character)) {
-      string += this.data.character;
-      this.read_character();
-    }
-
-    return string;
-  }
-
-  protected parse_identifier_string(): string {
-    let string = "";
-
-    while (!this.is_eof() && this.is_alphanum(this.data.character)) {
-      string += this.data.character;
-      this.read_character();
-    }
-
-    return string;
-  }
-
-  protected is_whitespace(character: string): boolean {
-    if (character.length > 1) {
-      return false;
-    }
-
-    return (
-      character == " " ||
-      character == "\t" ||
-      character == "\n" ||
-      character == "\r"
-    );
-  }
-
-  protected skip_whitespaces(): void {
-    while (!this.is_eof() && this.is_whitespace(this.data.character)) {
+  skip_whitespaces(): void {
+    while (!this.is_eof() && this.utils.is_whitespace(this.data.character)) {
       this.read_character();
     }
   }
 
-  private skip_comments(): void {
+  skip_comments(): void {
     while (!this.is_eof() && this.data.character != "\n") {
       this.read_character();
     }
   }
 
-  protected parse_sign(character: string): Token {
-    switch (character) {
-      case "+": {
-        return this.new_token(TokenType.PLUS, character);
-      }
-      case "-": {
-        return this.new_token(TokenType.MINUS, character);
-      }
-      case "*": {
-        return this.new_token(TokenType.MULT, character);
-      }
-      case "/": {
-        return this.new_token(TokenType.DIV, character);
-      }
+  parse_identifier(): string {
+    let string = "";
+
+    while (!this.is_eof() && this.utils.is_alphanum(this.data.character)) {
+      string += this.data.character;
+      this.read_character();
     }
 
-    return this.new_token(TokenType.ILLEGAL, "ILLEGAL");
+    return string;
   }
 
-  private parse_string(): string {
+  parse_number(): string {
+    let string = "";
+
+    while (!this.is_eof() && this.utils.is_float(this.data.character)) {
+      string += this.data.character;
+      this.read_character();
+    }
+
+    return string;
+  }
+
+  parse_string(): string {
     let string = "";
 
     while (!this.is_eof() && this.data.character != '"') {
@@ -147,15 +101,117 @@ export class Lexer {
     return string;
   }
 
+  parse_sign(): Token {
+    const data = this.get_current_data();
+
+    switch (data.current) {
+      case "+": {
+        return this.new_token(TokenType.PLUS, data.current);
+      }
+      case "-": {
+        return this.new_token(TokenType.MINUS, data.current);
+      }
+      case "*": {
+        return this.new_token(TokenType.MULT, data.current);
+      }
+      case "/": {
+        return this.new_token(TokenType.DIV, data.current);
+      }
+    }
+
+    return this.new_token(TokenType.ILLEGAL, data.current);
+  }
+
+  parse_relational_operators(): Token {
+    const data = this.get_current_data();
+
+    switch (data.current) {
+      case "=": {
+        if (data.next == "=") {
+          this.read_character();
+          return this.new_token(TokenType.EQUAL, "==");
+        }
+
+        return this.new_token(TokenType.ASSIGN, data.current);
+      }
+      case ">": {
+        if (data.next == "=") {
+          this.read_character();
+          return this.new_token(TokenType.GE, ">=");
+        }
+
+        return this.new_token(TokenType.GT, ">");
+      }
+      case "<": {
+        if (data.next == "=") {
+          this.read_character();
+          return this.new_token(TokenType.LE, "<=");
+        }
+
+        return this.new_token(TokenType.LT, "<");
+      }
+      case "!": {
+        if (data.next == "=") {
+          this.read_character();
+          return this.new_token(TokenType.DT, "!=");
+        }
+
+        return this.new_token(TokenType.ILLEGAL, data.current);
+      }
+    }
+
+    return this.new_token(TokenType.ILLEGAL, data.current);
+  }
+
+  parse_brackets(): Token {
+    const data = this.get_current_data();
+
+    switch (data.current) {
+      case "(": {
+        return this.new_token(TokenType.OPEN_PAREN, data.current);
+      }
+      case ")": {
+        return this.new_token(TokenType.CLOSED_PAREN, data.current);
+      }
+      case "[": {
+        return this.new_token(TokenType.OPEN_BRACKET, data.current);
+      }
+      case "]": {
+        return this.new_token(TokenType.CLOSED_BRACKET, data.current);
+      }
+      case "{": {
+        return this.new_token(TokenType.OPEN_BRACE, data.current);
+      }
+      case "}": {
+        return this.new_token(TokenType.CLOSED_BRACE, data.current);
+      }
+    }
+
+    return this.new_token(TokenType.ILLEGAL, data.current);
+  }
+
+  parse_symbols() {
+    const data = this.get_current_data();
+
+    switch (data.current) {
+      case ";": {
+        return this.new_token(TokenType.SEMI_COLON, data.current);
+      }
+      case ",": {
+        return this.new_token(TokenType.COMA, data.current);
+      }
+    }
+
+    return this.new_token(TokenType.ILLEGAL, data.current);
+  }
+
   public next_token(): Token {
     let token = this.new_token(TokenType.NULL, "NULL");
 
     this.skip_whitespaces();
 
-    if (
-      this.data.character == "-" &&
-      this.data.source[this.data.nextPosition] == "-"
-    ) {
+    const data = this.get_current_data();
+    if (this.utils.is_comment(data.current, data.next)) {
       this.skip_comments();
       this.skip_whitespaces();
     }
@@ -166,95 +222,31 @@ export class Lexer {
       case "-":
       case "+":
         {
-          token = this.parse_sign(this.data.character);
-        }
-        break;
-      case "(":
-        {
-          token = this.new_token(TokenType.OPEN_PAREN, this.data.character);
-        }
-        break;
-      case ")":
-        {
-          token = this.new_token(TokenType.CLOSED_PAREN, this.data.character);
-        }
-        break;
-      case "[":
-        {
-          token = this.new_token(TokenType.OPEN_BRACKET, this.data.character);
-        }
-        break;
-      case "]":
-        {
-          token = this.new_token(TokenType.CLOSED_BRACKET, this.data.character);
-        }
-        break;
-      case ";":
-        {
-          token = this.new_token(TokenType.SEMI_COLON, this.data.character);
+          token = this.parse_sign();
         }
         break;
       case "=":
-        {
-          const next = this.data.source[this.data.nextPosition];
-
-          if (next == "=") {
-            this.read_character();
-            token = this.new_token(TokenType.EQUAL, "==");
-          } else {
-            token = this.new_token(TokenType.ASSIGN, this.data.character);
-          }
-        }
-        break;
       case ">":
-        {
-          const next = this.data.source[this.data.nextPosition];
-
-          if (next == "=") {
-            this.read_character();
-            token = this.new_token(TokenType.GE, ">=");
-          } else {
-            token = this.new_token(TokenType.GT, ">");
-          }
-        }
-        break;
       case "<":
-        {
-          const next = this.data.source[this.data.nextPosition];
-
-          if (next == "=") {
-            this.read_character();
-            token = this.new_token(TokenType.LE, "<=");
-          } else {
-            token = this.new_token(TokenType.LT, "<");
-          }
-        }
-        break;
       case "!":
         {
-          const next = this.data.source[this.data.nextPosition];
-
-          if (next == "=") {
-            this.read_character();
-            token = this.new_token(TokenType.DT, "!=");
-          } else {
-            token = this.new_token(TokenType.ILLEGAL, this.data.character);
-          }
+          token = this.parse_relational_operators();
         }
         break;
-      case ",":
-        {
-          token = this.new_token(TokenType.COMA, this.data.character);
-        }
-        break;
+      case "(":
+      case ")":
+      case "[":
+      case "]":
       case "{":
-        {
-          token = this.new_token(TokenType.OPEN_BRACE, this.data.character);
-        }
-        break;
       case "}":
         {
-          token = this.new_token(TokenType.CLOSED_BRACE, this.data.character);
+          token = this.parse_brackets();
+        }
+        break;
+      case ";":
+      case ",":
+        {
+          token = this.parse_symbols();
         }
         break;
       case '"': {
@@ -268,10 +260,13 @@ export class Lexer {
           return this.new_token(TokenType.EOF, "EOF");
         }
 
-        if (this.is_alpha(this.data.character)) {
-          let string = this.parse_identifier_string();
+        const data = this.get_current_data();
 
-          if (keywords.has(string)) {
+        if (this.utils.is_alpha(data.current)) {
+          const string = this.parse_identifier();
+
+          const is_keyword = keywords.has(string);
+          if (is_keyword) {
             const token = keywords.get(string);
             return this.new_token(token as TokenType, string);
           }
@@ -279,8 +274,8 @@ export class Lexer {
           return this.new_token(TokenType.IDENTIFIER, string);
         }
 
-        if (this.is_digit(this.data.character)) {
-          let digits = this.parse_digits();
+        if (this.utils.is_float(data.current)) {
+          const digits = this.parse_number();
           return this.new_token(TokenType.NUMBER, digits);
         }
 
